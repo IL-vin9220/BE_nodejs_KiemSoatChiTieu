@@ -1,0 +1,18 @@
+@startuml
+
+actor User
+participant "API Router" as Router
+participant Controller
+participant Service
+participant Database
+
+User -> Router: POST /api/spending (with spending data)
+Router -> Controller: Call addSpending() with data
+Controller -> Service: Call createSpendingService() with data
+Service -> Database: Insert data into DB
+Database --> Service: Success/Error response
+Service --> Controller: Return result
+Controller --> Router: Send response (success/error)
+Router --> User: Return response (success/error)
+
+@enduml

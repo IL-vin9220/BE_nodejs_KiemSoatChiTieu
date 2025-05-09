@@ -1,0 +1,217 @@
+const axios = require('axios');
+const dotenv = require('dotenv');  // Import dotenv
+
+dotenv.config();  // Load biến môi trường từ .env file
+
+const SpendingDTO = require('../dto/request/spendingDTO');  // Import DTO
+const statusCodes = require('../config/statusCodes');
+const AppError = require("../config/error");
+let commonJS = require("./commonService");
+
+// Lấy thông tin từ .env
+const githubToken = process.env.GITHUB_TOKEN;
+const repoOwner = process.env.GITHUB_USERNAME;
+const repoName = process.env.REPO_NAME;
+
+const spendingURL = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/Database/User2/data1.json`;
+
+
+// Push file JSON lên GitHub
+async function AddNewSpending(req, res) {
+    try {
+        let originData = req.body;        
+
+        // chuyển đổi lại data
+        originData = convertInputContent(originData);
+
+        if(originData == -1){
+            throw new AppError("Lỗi chuyển đổi dữ liệu", statusCodes.INTERNAL_SERVER_ERROR);
+        }
+
+        // get all data spending
+        let getAll = await commonJS.getAll(spendingURL);
+
+        originData.forEach(item => {
+            getAll.push(item);
+        });
+
+        // console.log(getAll);
+    
+        let data = await commonJS.standardDataBeforePush(getAll);
+        
+        await commonJS.pushData(spendingURL, data);
+
+    } catch (error) {
+        // console.error('Error pushing to GitHub:', error.message);
+        throw new AppError("Thêm Thất Bại", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+function convertInputContent(data){
+    let dateObject = new Date(data.date);
+
+    let index = data.code;
+
+    let nameSpending = data.name.split(",");
+    let costSpending = data.cost.split(",");
+    let result = [];
+
+    if(nameSpending.length == costSpending.length){
+        result = nameSpending.map((itemName, i) => ({
+            "monthProduct":{"month": dateObject.getMonth()+1, "year": dateObject.getFullYear()}, "product": 
+            {
+                'code': 'P'+
+                dateObject.toLocaleDateString('en-US', {month: 'short'})+
+                dateObject.getFullYear().toString()+
+                (parseInt(index.substring(8,index.length))+1).toString(), // lấy ra id chi tiêu cuối cùng
+                'name': (itemName).trim(), 'cost': (costSpending[i].trim()), 'time': data.time, 'date': data.date, 'place': data.place, 'note': data.node, 'category': data.category
+            }
+        }));
+    }
+    else if(nameSpending.length > costSpending.length && costSpending.length == 1){
+        result = nameSpending.map(itemName => ({
+            "monthProduct":{"month": dateObject.getMonth()+1, "year": dateObject.getFullYear()}, "product": 
+            {
+                'code': 'P'+
+                dateObject.toLocaleDateString('en-US', {month: 'short'})+
+                dateObject.getFullYear().toString()+
+                (parseInt(index.substring(8,index.length))+1).toString(), // lấy ra id chi tiêu cuối cùng
+                'name': (itemName).trim(), 'cost': (costSpending[0].trim()), 'time': data.time, 'date': data.date, 'place': data.place, 'note': data.node, 'category': data.category
+            }
+        }));
+    }
+    else{
+        return -1;
+    }
+
+    return result;
+}
+
+async function UpdateSpending(req, res){
+    try{
+        let requestData = req.body;
+
+        let getAll = await commonJS.getAllSpending(spendingURL);
+
+        for(let i=0; i<getAll.length; i++){
+            let item = getAll[i];
+            if(item.product.code === requestData.code){
+                getAll[i].product.name = requestData.name;
+                getAll[i].product.cost = requestData.cost;
+                getAll[i].product.time = requestData.time;
+                getAll[i].product.date = requestData.date;
+                getAll[i].product.place = requestData.place;
+                getAll[i].product.note = requestData.note;
+                getAll[i].product.category = requestData.category;
+                break;
+            }
+        }
+
+        let data = await commonJS.standardDataBeforePush(getAll);
+
+        await commonJS.pushData(spendingURL, data);
+    }
+    catch(error){
+        // console.log("Error: ", error);
+        throw new AppError("Lỗi cập nhật bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+async function DeleteSpending(req, res){
+    try{
+        let requestData = req.body;
+
+        let getAll = await commonJS.getAllSpending(spendingURL);
+
+        for(let subCode of requestData){
+            getAll = getAll.filter(record => record.product.code !== subCode);
+        }
+
+        let data = await commonJS.standardDataBeforePush(getAll);
+
+        await commonJS.pushData(spendingURL, data);
+    }
+    catch(error){
+        throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+async function searchRecord(req, res){
+    try{
+        let requestData = req.body;
+
+        let getAll = await commonJS.getAllSpending(spendingURL);
+
+        if(requestData.type === "code"){
+            return getAll.filter(item => item.product.code === requestData.code);
+        }
+        else{
+            // type : name
+            return getAll.filter(item => item.product.name === requestData.name);
+        }
+    }
+    catch(error){
+        throw new AppError("Lỗi tìm kiếm bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+async function filterDateRecord(req, res){
+    try{
+        let requestData = req.body;
+        let startDate = new Date(requestData.startDate);
+        let endDate = new Date(requestData.endDate);
+
+        let getAll = await commonJS.getAllSpending(spendingURL);
+
+        return getAll.filter(record => {
+            let recordDate = new Date(record.product.date);
+            return startDate <= recordDate && recordDate <= endDate;
+        });
+    }
+    catch(error){
+        throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+async function filterTimeRecord(req, res){
+    try{
+        let requestData = req.body;
+
+        let getAll = await commonJS.getAllSpending(spendingURL);
+
+        return getAll.filter(record => {
+            return record.product.time === requestData.time;
+        });
+    }
+    catch(error){
+        throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+async function filterCostRecord(req, res){
+    try{
+        let requestData = req.body;
+        let startCost = parseInt(requestData.startCost);
+        let endCost = parseInt(requestData.endCost);
+
+        let getAll = await commonJS.getAllSpending(spendingURL);
+
+        return getAll.filter(record => {
+            let recordCost = parseInt(record.product.cost);
+            return startCost <= recordCost && recordCost <= endCost;
+        });
+    }
+    catch(error){
+        throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+module.exports = { 
+    AddNewSpending,
+    UpdateSpending,
+    DeleteSpending,
+    searchRecord,
+    filterDateRecord,
+    filterTimeRecord,
+    filterCostRecord,
+};
