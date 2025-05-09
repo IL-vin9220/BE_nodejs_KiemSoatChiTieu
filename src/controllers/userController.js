@@ -1,5 +1,6 @@
 let statusCodes = require("../config/statusCodes");
 let userService = require("../services/userService");
+let AppError = require("../config/error");
 
 exports.editCurrentUser = async(req, res) => {
     try{

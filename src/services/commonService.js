@@ -46,20 +46,20 @@ async function pushData(url, data){
 }
 
 // encode & standard data
-async function standardDataBeforePush(data){
+async function standardDataBeforePush(url, data){
     let encodeBase64 = Buffer.from(JSON.stringify(data)).toString("base64");
 
     return {
         message: "Update new spending record",
         content: encodeBase64,
-        sha: await getFileSha(),
+        sha: await getFileSha(url),
     }
 }
 
 // Lấy SHA của file hiện tại
-async function getFileSha() {
+async function getFileSha(url) {
     try {
-      const response = await axios.get(spendingURL, {
+      const response = await axios.get(url, {
         headers: {
           Authorization: `token ${githubToken}`,
         },

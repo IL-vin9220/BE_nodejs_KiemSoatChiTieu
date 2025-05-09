@@ -6,7 +6,6 @@ let userDTO = require("../dto/request/userDTO");
 let globalStore = require("../stores/globalStore");
 let common = require("../services/commonService");
 
-
 dotenv.config();
 
 const githubToken = process.env.GITHUB_TOKEN;
@@ -55,9 +54,11 @@ async function editUser(req, res){
             }
         }
 
-        let standardData = common.standardDataBeforePush(jsonData);
+
+        let standardData = await common.standardDataBeforePush(urlAccount, jsonData);
 
         await common.pushData(urlAccount, standardData);
+        // return jsonData;
 
     }
     catch(error){

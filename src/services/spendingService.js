@@ -7,6 +7,7 @@ const SpendingDTO = require('../dto/request/spendingDTO');  // Import DTO
 const statusCodes = require('../config/statusCodes');
 const AppError = require("../config/error");
 let commonJS = require("./commonService");
+let globalStore = require("../stores/globalStore");
 
 // Lấy thông tin từ .env
 const githubToken = process.env.GITHUB_TOKEN;
@@ -15,6 +16,14 @@ const repoName = process.env.REPO_NAME;
 
 const spendingURL = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/Database/User2/data1.json`;
 
+async function getAllSpending(){
+    try{
+        return await commonJS.getAll(spendingURL);
+    }
+    catch(error){
+        throw new AppError("Lỗi lấy dữ liệu chi tiêu", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
 
 // Push file JSON lên GitHub
 async function AddNewSpending(req, res) {
@@ -37,7 +46,7 @@ async function AddNewSpending(req, res) {
 
         // console.log(getAll);
     
-        let data = await commonJS.standardDataBeforePush(getAll);
+        let data = await commonJS.standardDataBeforePush(spendingURL, getAll);
         
         await commonJS.pushData(spendingURL, data);
 
@@ -107,7 +116,7 @@ async function UpdateSpending(req, res){
             }
         }
 
-        let data = await commonJS.standardDataBeforePush(getAll);
+        let data = await commonJS.standardDataBeforePush(spendingURL, getAll);
 
         await commonJS.pushData(spendingURL, data);
     }
@@ -127,7 +136,7 @@ async function DeleteSpending(req, res){
             getAll = getAll.filter(record => record.product.code !== subCode);
         }
 
-        let data = await commonJS.standardDataBeforePush(getAll);
+        let data = await commonJS.standardDataBeforePush(spendingURL, getAll);
 
         await commonJS.pushData(spendingURL, data);
     }
@@ -207,6 +216,7 @@ async function filterCostRecord(req, res){
 }
 
 module.exports = { 
+    getAllSpending,
     AddNewSpending,
     UpdateSpending,
     DeleteSpending,
