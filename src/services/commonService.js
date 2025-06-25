@@ -2,6 +2,7 @@ let axios = require("axios");
 let dotenv = require("dotenv");
 let statusCodes  = require("../config/statusCodes");
 const AppError = require("../config/error");
+let globalStore = require("../stores/globalStore");
 
 dotenv.config();
 
@@ -72,9 +73,10 @@ async function getFileSha(url) {
     }
 }
 
-async function getAllDataFile(urlFolder){
+async function getAllDataFile(urlString){
     try{
-        const urlFolder = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/Bill`;
+
+        urlFolder = globalStore.urlRoot + urlString;
 
         const response = await axios.get(urlFolder, {
             headers: {
@@ -83,9 +85,7 @@ async function getAllDataFile(urlFolder){
             }
         });
 
-        let result = [];
-
-        console.log(response.data);
+        let result = [];    
 
         response.data.forEach(item => {
             result.push(item.name);
@@ -96,6 +96,10 @@ async function getAllDataFile(urlFolder){
     catch(error){
         throw new AppError("Lỗi lấy danh sách dữ liệu", statusCodes.INTERNAL_SERVER_ERROR);
     }
+}
+
+async function GetAllDataFromFiles(url){
+
 }
 
 

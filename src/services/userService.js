@@ -93,8 +93,37 @@ async function blockUser(req, res){
     }
 }
 
+async function getUser(req, res){
+    try{
+        let urlAccount = `https://api.github.com/repos/${process.env.GITHUB_USERNAME}/${process.env.REPO_NAME}/contents/data/Account/account.json`;
+        let jsonData = await common.getAll(urlAccount);
+
+        let user = req.body;
+        for(let i=0; i<jsonData.length; i++){
+            if(user.username == jsonData[i].username && user.password == jsonData[i].password){
+                return{
+                    "username": jsonData[i].username,
+                    "password": jsonData[i].password,
+                    "email": jsonData[i].email,
+                    "status": jsonData[i].status,
+                    "name": jsonData[i].name,
+                    "google": jsonData[i].google,
+                    "facebook": jsonData[i].facebook,
+                    "avatar": jsonData[i].avatar,
+                    "createDate": jsonData[i].createDate,
+                    "index": jsonData[i].index
+                };
+            }
+        }
+    }
+    catch(error){
+        throw new AppError("Lỗi lấy thông tin tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
 module.exports = {
     createNewUser,
     editUser,
     blockUser,
+    getUser,
 };

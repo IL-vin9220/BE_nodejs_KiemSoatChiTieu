@@ -42,4 +42,6 @@ module.exports = {
     directorySetting,
     directFileAvatar,
     directoryCategory,
+
+    urlRoot,
 };

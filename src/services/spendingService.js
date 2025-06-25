@@ -100,7 +100,7 @@ async function UpdateSpending(req, res){
     try{
         let requestData = req.body;
 
-        let getAll = await commonJS.getAllSpending(spendingURL);
+        let getAll = await commonJS.getAll(spendingURL);
 
         for(let i=0; i<getAll.length; i++){
             let item = getAll[i];
@@ -130,7 +130,7 @@ async function DeleteSpending(req, res){
     try{
         let requestData = req.body;
 
-        let getAll = await commonJS.getAllSpending(spendingURL);
+        let getAll = await commonJS.getAll(spendingURL);
 
         for(let subCode of requestData){
             getAll = getAll.filter(record => record.product.code !== subCode);
@@ -149,7 +149,7 @@ async function searchRecord(req, res){
     try{
         let requestData = req.body;
 
-        let getAll = await commonJS.getAllSpending(spendingURL);
+        let getAll = await commonJS.getAll(spendingURL);
 
         if(requestData.type === "code"){
             return getAll.filter(item => item.product.code === requestData.code);
@@ -170,7 +170,7 @@ async function filterDateRecord(req, res){
         let startDate = new Date(requestData.startDate);
         let endDate = new Date(requestData.endDate);
 
-        let getAll = await commonJS.getAllSpending(spendingURL);
+        let getAll = await commonJS.getAll(spendingURL);
 
         return getAll.filter(record => {
             let recordDate = new Date(record.product.date);
@@ -178,7 +178,7 @@ async function filterDateRecord(req, res){
         });
     }
     catch(error){
-        throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -186,14 +186,14 @@ async function filterTimeRecord(req, res){
     try{
         let requestData = req.body;
 
-        let getAll = await commonJS.getAllSpending(spendingURL);
+        let getAll = await commonJS.getAll(spendingURL);
 
         return getAll.filter(record => {
             return record.product.time === requestData.time;
         });
     }
     catch(error){
-        throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -203,7 +203,7 @@ async function filterCostRecord(req, res){
         let startCost = parseInt(requestData.startCost);
         let endCost = parseInt(requestData.endCost);
 
-        let getAll = await commonJS.getAllSpending(spendingURL);
+        let getAll = await commonJS.getAll(spendingURL);
 
         return getAll.filter(record => {
             let recordCost = parseInt(record.product.cost);
@@ -211,7 +211,7 @@ async function filterCostRecord(req, res){
         });
     }
     catch(error){
-        throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 

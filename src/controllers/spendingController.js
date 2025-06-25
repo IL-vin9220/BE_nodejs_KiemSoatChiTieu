@@ -95,7 +95,8 @@ exports.filterCost = async (req, res) => {
 
 exports.getAllDataListFile = async(req, res) => {
     try{
-        let listFile = await commonService.getAllDataFile();
+        let urlString = req.body;
+        let listFile = await commonService.getAllDataFile(urlString);
         res.status(statusCodes.OK).json({message: "Lấy danh sách file dữ liệu thành công", data: listFile});
     }
     catch(error){

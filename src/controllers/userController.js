@@ -13,6 +13,17 @@ exports.editCurrentUser = async(req, res) => {
     }
 };
 
+exports.getUserInfor = async(req,res) => {
+    try{
+        let currentUser = await userService.getUser(req, res);
+        res.status(statusCodes.OK).json({message: "Thông tin người dùng", data: currentUser});
+    }
+    catch(error){
+        const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;
+        res.status(status).json({ error: error.message || "Lỗi server!" });
+    }
+}
+
 exports.createNewUser = async(req, res) => {
     try{
         await userService.createNewUser(req, res);
