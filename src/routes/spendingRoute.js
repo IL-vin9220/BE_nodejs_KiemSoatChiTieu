@@ -10,6 +10,8 @@ router.get("/search", spendingController.searchItemInfor);
 router.get("/filter-date", spendingController.filterDate);
 router.get("/filter-time", spendingController.filterTime);
 router.get("/filter-cost", spendingController.filterCost);
+router.get("/check-place-bought", spendingController.checkPlaceBought);
+router.get("/check-place-tomtom", spendingController.checkPlaceByTomTom);
 
 router.get("/get-data-file", spendingController.getAllDataListFile);
 

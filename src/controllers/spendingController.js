@@ -104,3 +104,27 @@ exports.getAllDataListFile = async(req, res) => {
         res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Có lỗi khi lấy dữ liệu' });
     }
 };
+
+exports.checkPlaceBought = async(req, res) => {
+    try{
+        let textPlace = req.body;
+        let placeByTomTom = SpendingService.getListPlaceBought(textPlace);
+        res.status(statusCodes.OK).json({message: "Danh sách kết quả nơi mua đã có", data: placeByTomTom});
+    }
+    catch(error){
+        console.error('Lỗi khi lấy dữ liệu nơi mua:', error);
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Có lỗi khi lấy dữ liệu' });
+    }
+};
+
+exports.checkPlaceByTomTom = async(req, res) => {
+    try{
+        let textPlace = req.body;
+        let placeByTomTom = SpendingService.getListPlaceTomTom(textPlace);
+        res.status(statusCodes.OK).json({message: "Danh sách kết quả vị trí", data: placeByTomTom});
+    }
+    catch(error){
+        console.error('Lỗi khi lấy dữ liệu vị trí:', error);
+        res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Có lỗi khi lấy dữ liệu vị trí' });
+    }
+};

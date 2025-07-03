@@ -215,6 +215,96 @@ async function filterCostRecord(req, res){
     }
 }
 
+async function getListPlaceBought(placeName){
+    try{
+        
+    }
+    catch(error){
+        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR)
+    }
+}
+
+async function getListPlaceTomTom(placeName) {
+    try{
+        let tomtomKey = process.env.TOMTOMAPIKEY;
+        const response = await fetch(`https://api.tomtom.com/search/2/search/${encodeURIComponent(placeName)}.json?key=${apiKey}&limit=5`);
+        const data = await response.json();
+
+        if (!data.results || data.results.length === 0) {
+            console.log("Không tìm thấy kết quả phù hợp.");
+            return []; // Trả về mảng rỗng nếu không có kết quả
+        }
+
+        // Duyệt danh sách kết quả và lấy thông tin cần thiết
+        let resultSearch = data.results.map(result => ({
+            name: result.poi?.name || query,
+            location: {
+                latitude: result.position?.lat || 0,
+                longitude: result.position?.lon || 0
+            },
+            address: result.address?.freeformAddress || "Không có địa chỉ"
+        }));
+
+        let arrayFindMap = [];
+
+        for (let place of resultSearch) {
+            // tính khoảng cách
+            let route = await getRouteToDestination(place, tomtomKey);
+            arrayFindMap.push({
+                "placeName": place.name,
+                "location": place.location,
+                "address": place.address,
+                "destination": route==-1? -1: (route.summary.lengthInMeters / 1000).toFixed(2)
+            });
+        }
+    }
+    catch(error){
+        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
+
+// lấy ra vị trí hiện tại
+async function getCurrentLocation() {
+    return new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => resolve({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude
+                }),
+                error => reject(error)
+            );
+        } else {
+            reject("Trình duyệt không hỗ trợ Geolocation.");
+        }
+    });
+}
+
+// Tính đường đi từ vị trí hiện tại đến địa điểm
+async function getRouteToDestination(destination, apiKey) {
+
+    try {
+        let currentLocation = await getCurrentLocation();
+
+        let url = `https://api.tomtom.com/routing/1/calculateRoute/${currentLocation.latitude},${currentLocation.longitude}:${destination.location.latitude},${destination.location.longitude}/json?key=${apiKey}&travelMode=car`;
+
+        let response = await fetch(url);
+        let data = await response.json();
+
+        if (data.routes && data.routes.length > 0) {
+            let route = data.routes[0];
+            return route;
+        } else {
+            // throw new Error("Không tìm thấy đường đi.");
+            return -1;
+        }
+    } catch (error) {
+        console.error("Lỗi khi tính toán đường đi:", error);
+        return null;
+    }
+}
+
 module.exports = { 
     getAllSpending,
     AddNewSpending,
@@ -224,4 +314,6 @@ module.exports = {
     filterDateRecord,
     filterTimeRecord,
     filterCostRecord,
+    getListPlaceBought,
+    getListPlaceTomTom,
 };
