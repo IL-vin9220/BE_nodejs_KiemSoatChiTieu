@@ -96,6 +96,7 @@ function convertInputContent(data){
     return result;
 }
 
+// cập nhật bản ghi
 async function UpdateSpending(req, res){
     try{
         let requestData = req.body;
@@ -126,6 +127,7 @@ async function UpdateSpending(req, res){
     }
 }
 
+// xóa bản ghi
 async function DeleteSpending(req, res){
     try{
         let requestData = req.body;
@@ -145,6 +147,7 @@ async function DeleteSpending(req, res){
     }
 }
 
+// tìm kiếm bản ghi
 async function searchRecord(req, res){
     try{
         let requestData = req.body;
@@ -164,6 +167,7 @@ async function searchRecord(req, res){
     }
 }
 
+// lọc
 async function filterDateRecord(req, res){
     try{
         let requestData = req.body;
@@ -263,7 +267,6 @@ async function getListPlaceTomTom(placeName) {
     }
 }
 
-
 // lấy ra vị trí hiện tại
 async function getCurrentLocation() {
     return new Promise((resolve, reject) => {
@@ -303,6 +306,18 @@ async function getRouteToDestination(destination, apiKey) {
         console.error("Lỗi khi tính toán đường đi:", error);
         return null;
     }
+}
+
+// chọn danh mục chi tiêu tự động
+async function autoCompleteCategory(req, res){
+    // lấy danh sách các danh mục
+    let path = globalStore.directoryCategory;
+    let categoryList = await commonJS.getAll(path);
+
+    // lấy ra danh sách tên sản phẩm chi tiêu
+    let spendingProductList = req.body;
+
+    // gửi danh sách chatgpt
 }
 
 module.exports = { 
