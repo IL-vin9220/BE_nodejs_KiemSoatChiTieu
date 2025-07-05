@@ -319,7 +319,7 @@ async function autoCompleteCategory(spendingList){
     
 
     // gửi danh sách chatgpt
-    let requestChatgpt = `danh sách chi tiêu: ${spendingList}\ndanh sách danh mục chi tiêu: ${categoryList}`;
+    let requestChatgpt = `danh sách chi tiêu: ${spendingList}\ndanh sách danh mục chi tiêu: ${categoryList}\ntrả về theo mảng, mỗi phần tử có dạng: {'spendingCode': spendingCode, 'spendingName': spendingName, 'categoryCode': categoryCode, 'categoryName': categoryName}`;
 
     // trả về danh mục được chọn
 
