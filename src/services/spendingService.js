@@ -309,15 +309,20 @@ async function getRouteToDestination(destination, apiKey) {
 }
 
 // chọn danh mục chi tiêu tự động
-async function autoCompleteCategory(req, res){
+async function autoCompleteCategory(spendingList){
+
     // lấy danh sách các danh mục
     let path = globalStore.directoryCategory;
     let categoryList = await commonJS.getAll(path);
 
     // lấy ra danh sách tên sản phẩm chi tiêu
-    let spendingProductList = req.body;
+    
 
     // gửi danh sách chatgpt
+    let requestChatgpt = `danh sách chi tiêu: ${spendingList}\ndanh sách danh mục chi tiêu: ${categoryList}`;
+
+    // trả về danh mục được chọn
+
 }
 
 module.exports = { 
