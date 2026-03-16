@@ -1,0 +1,144 @@
+= Tài Liệu Chức Năng Hệ Thống Quản Lý Tài Chính Cá Nhân
+:toc:
+:toclevels: 3
+
+== 1. Xác thực người dùng (JWT)
+
+- Đăng nhập
+- Đăng ký
+- Quên mật khẩu
+
+== 2. Chi tiêu
+
+- CRUD
+- Lọc:
+  * Theo ngày
+  * Theo thời gian
+  * Theo giá
+- Tìm kiếm
+- Tạo mới:
+  * Tự động chia thập phân khi nhập giá
+  * Tự động hiển thị thời điểm nhập theo giờ hiện tại
+  * Mặc định hiển thị là ngày hiện tại
+  * Nơi mua tìm trong danh sách nơi mua và thông qua TomTom API
+
+== 3. Thu nhập
+
+- CRUD
+- Lọc:
+  * Theo ngày
+  * Theo giá
+- Tìm kiếm
+
+== 4. Danh mục
+
+- CRUD
+- Phân loại tự động danh mục:
+  * Theo dữ liệu có sẵn
+  * Hoặc Naive Bayes (Machine Learning)
+
+== 5. Ngân sách
+
+- CRUD tài khoản
+- Đặt định mức chi tiêu cho kỳ:
+  * Ngày
+  * Tuần
+  * Tháng
+  * Năm
+- Theo dõi mức sử dụng ngân sách của từng tài khoản
+- Hiển thị cảnh báo khi vượt quá định mức
+
+== 6. Xử lý file
+
+- Dùng cho:
+  * Thêm bản ghi chi tiêu
+  * Thêm bản ghi thu nhập
+  * Báo cáo và phân tích
+
+- Loại file hỗ trợ:
+  * Nhập file:
+    ** CSV
+    ** Excel
+    ** JSON
+  * Xuất file:
+    ** CSV
+    ** Excel
+    ** PDF
+
+== 7. Báo cáo
+
+Tất cả báo cáo (trừ tổng quan) đều có mục so sánh với kỳ trước.
+
+=== 7.1. Tổng quan
+
+- Hiển thị tổng thu trong tháng hiện tại
+- Hiển thị tổng chi trong tháng hiện tại
+- Hiển thị phân bổ chi tiêu theo danh mục
+- Hiển thị 5 danh mục chi tiêu nhiều nhất
+- Hiển thị mức chi tiêu theo từng ngày trong tháng hiện tại
+- Hiển thị mức chi tiêu trung bình trong tháng hiện tại
+- Hiển thị ngày có mức chi tiêu cao nhất (Top 3 / 5 / 10 ngày)
+
+=== 7.2. Báo cáo thu chi
+
+- Báo cáo thu nhập / chi tiêu theo kỳ
+- Báo cáo thu chi theo tài khoản ví trong kỳ:
+  * Tổng thu
+  * Tổng chi
+  * Số dư cuối kỳ
+  * Tỷ lệ % sử dụng trong kỳ
+- Xu hướng chi tiêu theo thời gian
+
+=== 7.3. Báo cáo danh mục (theo kỳ)
+
+- Thống kê chi tiêu, thu nhập theo danh sách danh mục
+
+== 8. Phân tích
+
+- Thống kê và báo cáo tốc độ thay đổi chi tiêu giữa các kỳ (biểu đồ + danh sách)
+- Kiểm soát các chi tiêu giống và khác nhau (chi tiêu, giá)
+- Phân tích các chi tiêu thuộc nhóm danh mục không quan trọng hoặc giải trí
+- Đề xuất chi tiêu hợp lý trong kỳ sau
+
+== 9. Thông báo
+
+- Thông báo bản cập nhật mới của hệ thống
+- Các thông báo tự động:
+  * Sắp vượt định mức ví
+  * Báo cáo định kỳ (ngày / tháng / năm)
+  * Nhắc nhở nhập chi tiêu
+
+== 10. Cấu hình
+
+- Cài đặt định mức chi tiêu theo sản phẩm, ngày
+- Nhận thông báo:
+  * Các thông báo trong mục Thông báo
+- Nhật ký hoạt động
+- Thông tin tài khoản
+
+== 11. Sao lưu dữ liệu
+
+- Database được sao lưu từ:
+  * Local
+  * Neon (server)
+
+- Sử dụng CI/CD trên GitHub để chuyển dữ liệu vào driver
+- Restore:
+  * Dùng NodeJS chuyển dump file lên branch khác trên Neon
+
+== Giải nghĩa
+
+- CRUD: Xem, thêm, sửa, xóa
+- DB: Database
+- Neon: Dùng để triển khai database và truy cập qua mạng thay vì dùng local
+- JWT (JSON Web Token):
+  Dùng để xác thực người dùng khi sử dụng các tính năng của phần mềm trong một khoảng thời gian nhất định.
+  Khi token hết hạn, người dùng cần đăng nhập lại.
+
+== 12. mô tả nghiệp vụ bài toán
+	- tổng quan bài toán:
+		* người dùng khi đăng ký tài khoản sẽ được lựa chọn nhóm người dùng và chọn phương pháp tài chính phù hợp
+		* nhóm người dùng: mới quản lý chi tiêu, kiểm soát chi tiêu chặt chẽ, cân bằng cuộc sống - tài chính, tập trung tích lũy tài sản, khác
+		* phương pháp tài chính: 50/30/20, pay yourself first; envelope system, zero-based budgeting; 6 jars, 5 jars; high saving rate;
+		* khi có thu nhập đầu vào, người dùng sẽ thêm giao dịch từ thu nhập vào ví của mình trên phần mềm, sau đó phần mềm sẽ tự động phân bổ vào các quỹ(fund) theo phương pháp tài chính đã chọn khi thiết lập chức năng tự động phân bổ
+		* khi có phát sinh giao dịch sẽ thêm giao dịch vào phần mềm

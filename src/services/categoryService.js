@@ -11,3 +11,14 @@ const repoOwner = process.env.GITHUB_USERNAME;
 const repoName = process.env.REPO_NAME;
 
 const spendingURL = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/Database/User2/data1.json`
+
+// thêm danh mục
+async function addCategory(req, res){
+    try{
+        //
+    }
+    catch{
+        throw new AppError("Lỗi thêm danh mục", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+

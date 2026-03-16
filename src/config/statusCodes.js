@@ -1,4 +1,4 @@
-module.exports = {
+const statusCodes = {
     OK: 200,                     // Thành công
     CREATED: 201,               // Đã tạo thành công
     BAD_REQUEST: 400,           // Yêu cầu không hợp lệ
@@ -8,4 +8,5 @@ module.exports = {
     INTERNAL_SERVER_ERROR: 500, // Lỗi phía máy chủ
     BAD_LOGIC: 422,             // lỗi logic
 };
-  
+
+export default statusCodes;

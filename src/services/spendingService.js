@@ -1,13 +1,16 @@
-const axios = require('axios');
-const dotenv = require('dotenv');  // Import dotenv
+import axios from 'axios';
+import { config } from 'dotenv';  // Import dotenv
+import SpendingRepo from '../repositories/spendingRepo.js';
+import SpendingAddRecord from '../dto/request/spendingAddRecordDTO.js';
+import SpendingUpdateRecord from '../dto/request/spendingUpdateRecordDTO.js';
 
-dotenv.config();  // Load biến môi trường từ .env file
+config();  // Load biến môi trường từ .env file
 
-const SpendingDTO = require('../dto/request/spendingDTO');  // Import DTO
-const statusCodes = require('../config/statusCodes');
-const AppError = require("../config/error");
-let commonJS = require("./commonService");
-let globalStore = require("../stores/globalStore");
+// import SpendingDTO from '../dto/request/spendingAddRecordDTO';  // Import DTO
+import INTERNAL_SERVER_ERROR from '../config/statusCodes.js';
+import AppError from "../config/error.js";
+import { getAll as _getAll, standardDataBeforePush, pushData } from "./commonService.js";
+import { directoryCategory } from "../stores/globalStore.js";
 
 // Lấy thông tin từ .env
 const githubToken = process.env.GITHUB_TOKEN;
@@ -16,46 +19,36 @@ const repoName = process.env.REPO_NAME;
 
 const spendingURL = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/Database/User2/data1.json`;
 
+// lấy tất cả dữ liệu chi tiêu
 async function getAllSpending(){
     try{
-        return await commonJS.getAll(spendingURL);
+        return await _getAll(spendingURL);
     }
     catch(error){
-        throw new AppError("Lỗi lấy dữ liệu chi tiêu", statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi lấy dữ liệu chi tiêu", INTERNAL_SERVER_ERROR);
     }
 }
 
-// Push file JSON lên GitHub
-async function AddNewSpending(req, res) {
+// thêm mới bản ghi chi tiêu
+async function AddNewSpending(req) {
     try {
-        let originData = req.body;        
+        let originData = req.body;
 
-        // chuyển đổi lại data
-        originData = convertInputContent(originData);
+        // format lại theo dto
+        let spendingRecord = new SpendingAddRecord(
+            originData
+        );
 
-        if(originData == -1){
-            throw new AppError("Lỗi chuyển đổi dữ liệu", statusCodes.INTERNAL_SERVER_ERROR);
-        }
-
-        // get all data spending
-        let getAll = await commonJS.getAll(spendingURL);
-
-        originData.forEach(item => {
-            getAll.push(item);
-        });
-
-        // console.log(getAll);
-    
-        let data = await commonJS.standardDataBeforePush(spendingURL, getAll);
-        
-        await commonJS.pushData(spendingURL, data);
+        // thêm vào db
+        return await SpendingRepo.addNew(spendingRecord);
 
     } catch (error) {
-        // console.error('Error pushing to GitHub:', error.message);
-        throw new AppError("Thêm Thất Bại", statusCodes.INTERNAL_SERVER_ERROR);
+        console.error('Error:', error.message);
+        throw new AppError("Thêm Thất Bại", INTERNAL_SERVER_ERROR);
     }
 }
 
+// chuyển đổi dữ liệu đầu vào thành định dạng phù hợp với DTO
 function convertInputContent(data){
     let dateObject = new Date(data.date);
 
@@ -96,63 +89,45 @@ function convertInputContent(data){
     return result;
 }
 
-// cập nhật bản ghi
-async function UpdateSpending(req, res){
+// cập nhật bản ghi chi tiêu
+async function UpdateSpending(req){
     try{
         let requestData = req.body;
 
-        let getAll = await commonJS.getAll(spendingURL);
+        // format lại theo dto
+        let spendingRecord = new SpendingUpdateRecord(
+            requestData
+        );
 
-        for(let i=0; i<getAll.length; i++){
-            let item = getAll[i];
-            if(item.product.code === requestData.code){
-                getAll[i].product.name = requestData.name;
-                getAll[i].product.cost = requestData.cost;
-                getAll[i].product.time = requestData.time;
-                getAll[i].product.date = requestData.date;
-                getAll[i].product.place = requestData.place;
-                getAll[i].product.note = requestData.note;
-                getAll[i].product.category = requestData.category;
-                break;
-            }
-        }
+        console.log("Spending Record: ", spendingRecord);
 
-        let data = await commonJS.standardDataBeforePush(spendingURL, getAll);
-
-        await commonJS.pushData(spendingURL, data);
+        // cập nhật vào db
+        return await SpendingRepo.update(spendingRecord, 1);
     }
     catch(error){
-        // console.log("Error: ", error);
-        throw new AppError("Lỗi cập nhật bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+        console.log("Error: ", error);
+        throw new AppError("Lỗi cập nhật bản ghi", INTERNAL_SERVER_ERROR);
     }
 }
 
-// xóa bản ghi
-async function DeleteSpending(req, res){
+// xóa bản ghi chi tiêu
+async function softDeleteSpending(req){
     try{
         let requestData = req.body;
 
-        let getAll = await commonJS.getAll(spendingURL);
-
-        for(let subCode of requestData){
-            getAll = getAll.filter(record => record.product.code !== subCode);
-        }
-
-        let data = await commonJS.standardDataBeforePush(spendingURL, getAll);
-
-        await commonJS.pushData(spendingURL, data);
+        return await SpendingRepo.softDelete(requestData.id); // xóa mềm trong db
     }
     catch(error){
-        throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi xóa bản ghi", INTERNAL_SERVER_ERROR);
     }
 }
 
-// tìm kiếm bản ghi
-async function searchRecord(req, res){
+// tìm kiếm bản ghi theo code hoặc tên sản phẩm
+async function searchRecord(req){
     try{
         let requestData = req.body;
 
-        let getAll = await commonJS.getAll(spendingURL);
+        let getAll = await _getAll(spendingURL);
 
         if(requestData.type === "code"){
             return getAll.filter(item => item.product.code === requestData.code);
@@ -163,18 +138,18 @@ async function searchRecord(req, res){
         }
     }
     catch(error){
-        throw new AppError("Lỗi tìm kiếm bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi tìm kiếm bản ghi", INTERNAL_SERVER_ERROR);
     }
 }
 
-// lọc
-async function filterDateRecord(req, res){
+// lọc bản ghi theo ngày tháng
+async function filterDateRecord(req){
     try{
         let requestData = req.body;
         let startDate = new Date(requestData.startDate);
         let endDate = new Date(requestData.endDate);
 
-        let getAll = await commonJS.getAll(spendingURL);
+        let getAll = await _getAll(spendingURL);
 
         return getAll.filter(record => {
             let recordDate = new Date(record.product.date);
@@ -182,32 +157,34 @@ async function filterDateRecord(req, res){
         });
     }
     catch(error){
-        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, INTERNAL_SERVER_ERROR);
     }
 }
 
-async function filterTimeRecord(req, res){
+// lọc bản ghi theo thời gian trong ngày
+async function filterTimeRecord(req){
     try{
         let requestData = req.body;
 
-        let getAll = await commonJS.getAll(spendingURL);
+        let getAll = await _getAll(spendingURL);
 
         return getAll.filter(record => {
             return record.product.time === requestData.time;
         });
     }
     catch(error){
-        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, INTERNAL_SERVER_ERROR);
     }
 }
 
-async function filterCostRecord(req, res){
+// lọc bản ghi theo khoảng chi phí
+async function filterCostRecord(req){
     try{
         let requestData = req.body;
         let startCost = parseInt(requestData.startCost);
         let endCost = parseInt(requestData.endCost);
 
-        let getAll = await commonJS.getAll(spendingURL);
+        let getAll = await _getAll(spendingURL);
 
         return getAll.filter(record => {
             let recordCost = parseInt(record.product.cost);
@@ -215,19 +192,24 @@ async function filterCostRecord(req, res){
         });
     }
     catch(error){
-        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, INTERNAL_SERVER_ERROR);
     }
 }
 
+// lấy danh sách địa điểm mua hàng trong db
 async function getListPlaceBought(placeName){
     try{
-        
+        // lấy tất cả địa điểm mua hàng trong db
+        // let getAllPlace = await 
+
+        // return getAllPlace;
     }
     catch(error){
-        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR)
+        throw new AppError("Lỗi: "+error, INTERNAL_SERVER_ERROR)
     }
 }
 
+// lấy danh sách địa điểm từ tomtom
 async function getListPlaceTomTom(placeName) {
     try{
         let tomtomKey = process.env.TOMTOMAPIKEY;
@@ -263,7 +245,7 @@ async function getListPlaceTomTom(placeName) {
         }
     }
     catch(error){
-        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -312,8 +294,8 @@ async function getRouteToDestination(destination, apiKey) {
 async function autoCompleteCategory(spendingList){
 
     // lấy danh sách các danh mục
-    let path = globalStore.directoryCategory;
-    let categoryList = await commonJS.getAll(path);
+    let path = directoryCategory;
+    let categoryList = await _getAll(path);
 
     // lấy ra danh sách tên sản phẩm chi tiêu
     
@@ -325,11 +307,12 @@ async function autoCompleteCategory(spendingList){
 
 }
 
-module.exports = { 
+export default { 
     getAllSpending,
     AddNewSpending,
     UpdateSpending,
-    DeleteSpending,
+    softDeleteSpending,
+    // DeleteSpending,
     searchRecord,
     filterDateRecord,
     filterTimeRecord,

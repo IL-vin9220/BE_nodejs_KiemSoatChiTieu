@@ -1,0 +1,35 @@
+= Kiem Soat Chi Tieu Documentation
+
+[%autowidth.stretch]
+[cols="^1,1,1,1,1,1,1,>1", options="header", width="100%"]
+|===
+| STT | UseCase | Repository | Services | Controller | API Endpoint | storage | Process
+
+| 1
+| Add New Spending Record
+| SpendingRepo.addNew(spendingRecord)
+| SpendingService.addNewSpendingRecord(originData)
+| SpendingController.addNewSpendingRecord(req)
+| POST /api/spending/add-new
+| local database (PostgreSQL)
+| done
+
+| 2
+| Update Spending Record
+| SpendingRepo.update(spendingRecord)
+| SpendingService.updateSpending(originData)
+| SpendingController.updateSpendingRecord(req)
+| PUT /api/spending/update
+| local database (PostgreSQL)
+| done
+
+| 3
+| Add New Spending Record
+| SpendingRepo.addNew(spendingRecord)
+| SpendingService.addNewSpendingRecord(originData)
+| SpendingController.addNewSpendingRecord(req)
+| POST /api/spending/add-new
+| local database (PostgreSQL)
+| done
+
+|===

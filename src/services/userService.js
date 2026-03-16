@@ -12,6 +12,7 @@ const githubToken = process.env.GITHUB_TOKEN;
 const repoOwner = process.env.GITHUB_USERNAME;
 const repoName = process.env.REPO_NAME;
 
+// thêm mới người dùng
 async function createNewUser(req, res){
     try{
         let response = await getAllDataUser();
@@ -33,6 +34,7 @@ async function createNewUser(req, res){
     }
 }
 
+// sửa thông tin người dùng
 async function editUser(req, res){
     try{
         let urlAccount = globalStore.directoryAcc;
@@ -66,6 +68,7 @@ async function editUser(req, res){
     }
 }
 
+// khóa tài khoản người dùng
 async function blockUser(req, res){
     try{
         let urlAccount = globalStore.directoryAcc;
@@ -93,6 +96,7 @@ async function blockUser(req, res){
     }
 }
 
+// lấy thông tin người dùng
 async function getUser(req, res){
     try{
         let urlAccount = `https://api.github.com/repos/${process.env.GITHUB_USERNAME}/${process.env.REPO_NAME}/contents/data/Account/account.json`;

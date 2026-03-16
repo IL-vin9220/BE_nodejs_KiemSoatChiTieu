@@ -1,0 +1,23 @@
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+#content,
+main,
+body > div {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    max-width: 100% !important;
+}
+
+table {
+    margin-left: 0 !important;
+}
+
+.asciidoc-body {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 20px !important;
+}
