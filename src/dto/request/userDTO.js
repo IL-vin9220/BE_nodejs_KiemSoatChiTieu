@@ -1,22 +1,30 @@
 class User {
     constructor({
+        id = null,
         name = '',
         username = '',
-        pass = '',
+        password = '',
         email = '',
+        sdt = '',
         avatar = '',
-        createDate = new Date(),
-        status = 'active',
-        index = 0
-    } = {}) { // ← thêm `= {}` để khi không truyền gì vẫn không lỗi
+        status = 'ACTIVE',
+        createdAt = new Date(),
+        updatedAt = null,
+        deletedAt = null
+    } = {}) {
+
+        this.id = id;
         this.name = name;
         this.username = username;
-        this.pass = pass;
+        this.password = password;
         this.email = email;
+        this.sdt = sdt;
         this.avatar = avatar;
-        this.createDate = createDate;
         this.status = status;
-        this.index = index;
+
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.deletedAt = deletedAt;
     }
 }
 

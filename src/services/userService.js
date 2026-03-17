@@ -1,44 +1,40 @@
-let axios = require("axios");
-let dotenv = require("dotenv");
-let AppError = require("../config/error");
-let statusCodes = require("../config/statusCodes");
-let userDTO = require("../dto/request/userDTO");
-let globalStore = require("../stores/globalStore");
-let common = require("../services/commonService");
+import axios from "axios";
+import { config } from "dotenv";
+import AppError from "../config/error";
+import { INTERNAL_SERVER_ERROR } from "../config/statusCodes";
+import userDTO from "../dto/request/userDTO";
+import { directoryAcc, indexUser } from "../stores/globalStore";
+import { getAll, standardDataBeforePush, pushData } from "../services/commonService";
+import userRepo from "../repositories/userRepo.js"
 
-dotenv.config();
+config();
 
-const githubToken = process.env.GITHUB_TOKEN;
-const repoOwner = process.env.GITHUB_USERNAME;
-const repoName = process.env.REPO_NAME;
+// const githubToken = process.env.GITHUB_TOKEN;
+// const repoOwner = process.env.GITHUB_USERNAME;
+// const repoName = process.env.REPO_NAME;
 
 // thêm mới người dùng
 async function createNewUser(req, res){
     try{
-        let response = await getAllDataUser();
-
         let newUser = new userDTO();
         newUser.username = req.username;
-        newUser.pass = req.password;
+        newUser.password = req.password;
         newUser.email = req.email;
+        newUser.sdt = req.sdt;
         newUser.status = 1;
-        newUser.index = response[response.length - 1].index;
 
-        response.push(newUser);
-
-
-
+        userRepo.addNewUser(newUser);
     }
     catch(error){
-        throw new AppError("Lỗi tạo mới tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi tạo mới tài khoản người dùng", INTERNAL_SERVER_ERROR);
     }
 }
 
 // sửa thông tin người dùng
 async function editUser(req, res){
     try{
-        let urlAccount = globalStore.directoryAcc;
-        let jsonData = await common.getAll(urlAccount);
+        let urlAccount = directoryAcc;
+        let jsonData = await getAll(urlAccount);
 
         let userChange = req.body;
 
@@ -46,7 +42,7 @@ async function editUser(req, res){
 
         for(let i=0; i<jsonData.length; i++){
             let user = jsonData[i];
-            if(user.index == globalStore.indexUser){
+            if(user.index == indexUser){
                 jsonData[i].username = userChange.username;
                 jsonData[i].name = userChange.name;
                 jsonData[i].password = userChange.password;
@@ -57,22 +53,22 @@ async function editUser(req, res){
         }
 
 
-        let standardData = await common.standardDataBeforePush(urlAccount, jsonData);
+        let standardData = await standardDataBeforePush(urlAccount, jsonData);
 
-        await common.pushData(urlAccount, standardData);
+        await pushData(urlAccount, standardData);
         // return jsonData;
 
     }
     catch(error){
-        throw new AppError("Lỗi cập nhật thông tin người dùng", statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi cập nhật thông tin người dùng", INTERNAL_SERVER_ERROR);
     }
 }
 
 // khóa tài khoản người dùng
 async function blockUser(req, res){
     try{
-        let urlAccount = globalStore.directoryAcc;
-        let jsonData = await common.getAll(urlAccount);
+        let urlAccount = directoryAcc;
+        let jsonData = await getAll(urlAccount);
 
         let listIndexUserBlocked = req.body;
 
@@ -86,13 +82,13 @@ async function blockUser(req, res){
             }
         }
 
-        let standardData = common.standardDataBeforePush(jsonData);
+        let standardData = standardDataBeforePush(jsonData);
 
-        await common.pushData(standardData, urlAccount);
+        await pushData(standardData, urlAccount);
 
     }
     catch(error){
-        throw new AppError("Lỗi Khóa tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi Khóa tài khoản người dùng", INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -100,7 +96,7 @@ async function blockUser(req, res){
 async function getUser(req, res){
     try{
         let urlAccount = `https://api.github.com/repos/${process.env.GITHUB_USERNAME}/${process.env.REPO_NAME}/contents/data/Account/account.json`;
-        let jsonData = await common.getAll(urlAccount);
+        let jsonData = await getAll(urlAccount);
 
         let user = req.body;
         for(let i=0; i<jsonData.length; i++){
@@ -121,11 +117,11 @@ async function getUser(req, res){
         }
     }
     catch(error){
-        throw new AppError("Lỗi lấy thông tin tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi lấy thông tin tài khoản người dùng", INTERNAL_SERVER_ERROR);
     }
 }
 
-module.exports = {
+export default {
     createNewUser,
     editUser,
     blockUser,

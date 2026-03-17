@@ -13,11 +13,11 @@ import { getAll as _getAll, standardDataBeforePush, pushData } from "./commonSer
 import { directoryCategory } from "../stores/globalStore.js";
 
 // Lấy thông tin từ .env
-const githubToken = process.env.GITHUB_TOKEN;
-const repoOwner = process.env.GITHUB_USERNAME;
-const repoName = process.env.REPO_NAME;
+// const githubToken = process.env.GITHUB_TOKEN;
+// const repoOwner = process.env.GITHUB_USERNAME;
+// const repoName = process.env.REPO_NAME;
 
-const spendingURL = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/Database/User2/data1.json`;
+// const spendingURL = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/Database/User2/data1.json`;
 
 // lấy tất cả dữ liệu chi tiêu
 async function getAllSpending(){
