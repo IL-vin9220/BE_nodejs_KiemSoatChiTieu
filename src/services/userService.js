@@ -14,7 +14,7 @@ config();
 // const repoName = process.env.REPO_NAME;
 
 // thêm mới người dùng
-async function createNewUser(req, res){
+async function createNewUser(req){
     try{
         let newUser = new userDTO();
         newUser.username = req.username;
@@ -23,7 +23,7 @@ async function createNewUser(req, res){
         newUser.sdt = req.sdt;
         newUser.status = 1;
 
-        userRepo.addNewUser(newUser);
+        return await userRepo.addNewUser(newUser);
     }
     catch(error){
         throw new AppError("Lỗi tạo mới tài khoản người dùng", INTERNAL_SERVER_ERROR);
@@ -31,32 +31,18 @@ async function createNewUser(req, res){
 }
 
 // sửa thông tin người dùng
-async function editUser(req, res){
+async function editUser(req){
     try{
-        let urlAccount = directoryAcc;
-        let jsonData = await getAll(urlAccount);
 
-        let userChange = req.body;
+        let newUser = new userDTO();
+        newUser.username = req.username;
+        newUser.password = req.password;
+        newUser.email = req.email;
+        newUser.sdt = req.sdt;
+        newUser.name = req.name;
+        newUser.avatar = req.avatar;
 
-        // console.log(req);
-
-        for(let i=0; i<jsonData.length; i++){
-            let user = jsonData[i];
-            if(user.index == indexUser){
-                jsonData[i].username = userChange.username;
-                jsonData[i].name = userChange.name;
-                jsonData[i].password = userChange.password;
-                jsonData[i].email = userChange.email;
-                jsonData[i].avatar = userChange.avatar;
-                break;
-            }
-        }
-
-
-        let standardData = await standardDataBeforePush(urlAccount, jsonData);
-
-        await pushData(urlAccount, standardData);
-        // return jsonData;
+        return await userRepo.updateUser(newUser);
 
     }
     catch(error){
@@ -64,57 +50,46 @@ async function editUser(req, res){
     }
 }
 
-// khóa tài khoản người dùng
-async function blockUser(req, res){
-    try{
-        let urlAccount = directoryAcc;
-        let jsonData = await getAll(urlAccount);
+// khóa tài khoản người dùng - chức năng chỉ dùng cho admin
+// async function blockUser(req, res){
+//     try{
+//         let urlAccount = directoryAcc;
+//         let jsonData = await getAll(urlAccount);
 
-        let listIndexUserBlocked = req.body;
+//         let listIndexUserBlocked = req.body;
 
-        for(let subIndex of listIndexUserBlocked){
-            for(let i=0; i<jsonData.length; i++){
-                let user = jsonData[i];
-                if(user.index == subIndex){
-                    jsonData[i].status = 0;
-                    break;
-                }
-            }
-        }
+//         for(let subIndex of listIndexUserBlocked){
+//             for(let i=0; i<jsonData.length; i++){
+//                 let user = jsonData[i];
+//                 if(user.index == subIndex){
+//                     jsonData[i].status = 0;
+//                     break;
+//                 }
+//             }
+//         }
 
-        let standardData = standardDataBeforePush(jsonData);
+//         let standardData = standardDataBeforePush(jsonData);
 
-        await pushData(standardData, urlAccount);
+//         await pushData(standardData, urlAccount);
 
-    }
-    catch(error){
-        throw new AppError("Lỗi Khóa tài khoản người dùng", INTERNAL_SERVER_ERROR);
-    }
-}
+//     }
+//     catch(error){
+//         throw new AppError("Lỗi Khóa tài khoản người dùng", INTERNAL_SERVER_ERROR);
+//     }
+// }
 
 // lấy thông tin người dùng
-async function getUser(req, res){
+async function getUser(req){
     try{
-        let urlAccount = `https://api.github.com/repos/${process.env.GITHUB_USERNAME}/${process.env.REPO_NAME}/contents/data/Account/account.json`;
-        let jsonData = await getAll(urlAccount);
+        let newUser = new userDTO();
+        newUser.username = req.username;
+        newUser.password = req.password;
+        newUser.email = req.email;
+        newUser.sdt = req.sdt;
+        newUser.name = req.name;
+        newUser.avatar = req.avatar;
 
-        let user = req.body;
-        for(let i=0; i<jsonData.length; i++){
-            if(user.username == jsonData[i].username && user.password == jsonData[i].password){
-                return{
-                    "username": jsonData[i].username,
-                    "password": jsonData[i].password,
-                    "email": jsonData[i].email,
-                    "status": jsonData[i].status,
-                    "name": jsonData[i].name,
-                    "google": jsonData[i].google,
-                    "facebook": jsonData[i].facebook,
-                    "avatar": jsonData[i].avatar,
-                    "createDate": jsonData[i].createDate,
-                    "index": jsonData[i].index
-                };
-            }
-        }
+        return await userRepo.getUserInfor(newUser);
     }
     catch(error){
         throw new AppError("Lỗi lấy thông tin tài khoản người dùng", INTERNAL_SERVER_ERROR);
@@ -124,6 +99,5 @@ async function getUser(req, res){
 export default {
     createNewUser,
     editUser,
-    blockUser,
     getUser,
 };

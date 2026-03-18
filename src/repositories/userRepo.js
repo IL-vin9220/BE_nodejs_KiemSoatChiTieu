@@ -71,4 +71,18 @@ class UserRepository{
         let result = await pool.query(query, values)
         return result.rows[0];
     }
+
+    async getUserInfor(user){
+        let query = `
+            select * from users where username = $1 and password = $2
+        `;
+
+        let values = [
+            user.username,
+            user.password
+        ];
+
+        let result = await pool.query(query, values);
+        return result.rows[0];
+    }
 }
