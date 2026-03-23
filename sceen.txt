@@ -1,0 +1,46 @@
+1. xác thực người dùng:
+    - đăng nhập
+    - đăng ký
+    - nhập email/sdt lấy lại mật khẩu
+    - nhập mật khẩu mới
+
+2. giao dịch:
+    - thêm/sửa giao dịch(chi tiêu, thu nhập, vay nợ)
+    - xem ds giao dịch
+    - popup thông báo
+    - xóa giao dịch
+    - lọc giao dịch
+    - tìm kiếm giao dịch
+    - lựa chọn danh mục
+    - lựa chọn ví/quỹ
+    - xuất file
+    - nhập file
+
+3. danh mục, quỹ, ví:
+    - thêm/sửa
+    - xem ds
+    - popup thông báo
+    - xóa
+    - lọc
+    - tìm kiếm
+
+4. báo cáo:
+    - tổng quan báo cáo
+    - danh sách báo cáo
+    - màn hình của từng loại báo cáo
+
+5. phân tích:
+    - tổng quan phân tích
+    - danh sách các mục phân tích
+    - màn hình của từng mục phân tích
+
+6. Thông báo:
+    - popup thông báo khi ấn quả chuông
+    - danh sách các thông báo
+    - tin nhắn của người dùng khác gửi đến
+    - danh sách các tin nhắn của người dùng khác gửi đến
+
+7. Cấu hình:
+    - danh sách các mục thuộc cấu hình
+    - màn hình chi tiết
+
