@@ -1,17 +1,12 @@
 import axios from "axios";
 import { config } from "dotenv";
-import AppError from "../config/error";
-import { INTERNAL_SERVER_ERROR } from "../config/statusCodes";
-import userDTO from "../dto/request/userDTO";
-import { directoryAcc, indexUser } from "../stores/globalStore";
-import { getAll, standardDataBeforePush, pushData } from "../services/commonService";
-import userRepo from "../repositories/userRepo.js"
+import AppError from "../config/error.js";
+import statusCodes from "../config/statusCodes.js";
+import userDTO from "../dto/request/userDTO.js";
+// import { getAll, standardDataBeforePush, pushData } from "../services/commonService.js";
+import UserRepository from "../repositories/userRepo.js"
 
 config();
-
-// const githubToken = process.env.GITHUB_TOKEN;
-// const repoOwner = process.env.GITHUB_USERNAME;
-// const repoName = process.env.REPO_NAME;
 
 // thêm mới người dùng
 async function createNewUser(req){
@@ -23,10 +18,10 @@ async function createNewUser(req){
         newUser.sdt = req.sdt;
         newUser.status = 1;
 
-        return await userRepo.addNewUser(newUser);
+        return await UserRepository.addNewUser(newUser);
     }
     catch(error){
-        throw new AppError("Lỗi tạo mới tài khoản người dùng", INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi tạo mới tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -42,11 +37,11 @@ async function editUser(req){
         newUser.name = req.name;
         newUser.avatar = req.avatar;
 
-        return await userRepo.updateUser(newUser);
+        return await UserRepository.updateUser(newUser);
 
     }
     catch(error){
-        throw new AppError("Lỗi cập nhật thông tin người dùng", INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi cập nhật thông tin người dùng", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -74,7 +69,7 @@ async function editUser(req){
 
 //     }
 //     catch(error){
-//         throw new AppError("Lỗi Khóa tài khoản người dùng", INTERNAL_SERVER_ERROR);
+//         throw new AppError("Lỗi Khóa tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
 //     }
 // }
 
@@ -89,10 +84,10 @@ async function getUser(req){
         newUser.name = req.name;
         newUser.avatar = req.avatar;
 
-        return await userRepo.getUserInfor(newUser);
+        return await UserRepository.getUserInfor(newUser);
     }
     catch(error){
-        throw new AppError("Lỗi lấy thông tin tài khoản người dùng", INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi lấy thông tin tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 

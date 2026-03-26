@@ -1,9 +1,9 @@
-let express = require("express");
-let route = express.Router();
-let categoryService = require("../controllers/categoryController");
+import { Router } from "express";
+let categoryRoute = Router();
+import { autoCategory, createCategory } from "../controllers/categoryController.js";
 
-route.get("/complete-category", categoryService.autoCategory);
-route.put("/add-new", categoryService.createCategory);
+categoryRoute.get("/complete-category", autoCategory);
+categoryRoute.put("/add-new", createCategory);
 
 
-module.exports = route;
+export default categoryRoute;

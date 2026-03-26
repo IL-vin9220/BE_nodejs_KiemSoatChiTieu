@@ -1,21 +1,21 @@
-let statusCodes = require("../config/statusCodes");
-let userService = require("../services/userService");
-let AppError = require("../config/error");
+import statusCodes from "../config/statusCodes.js";
+import userServices from "../services/userService.js";
+import AppError from "../config/error.js";
 
-exports.editCurrentUser = async(req, res) => {
+export async function editCurrentUser(req, res) {
     try{
-        await userService.editUser(req, res);
+        await userServices.editUser(req, res);
         res.status(statusCodes.OK).json({message: "Cập nhật thông tin user thành công"});
     }
     catch(error){
         const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;
         res.status(status).json({ error: error.message || "Lỗi server!" });
     }
-};
+}
 
-exports.getUserInfor = async(req,res) => {
+export async function getUserInfor(req,res) {
     try{
-        let currentUser = await userService.getUser(req, res);
+        let currentUser = await userServices.getUser(req, res);
         res.status(statusCodes.OK).json({message: "Thông tin người dùng", data: currentUser});
     }
     catch(error){
@@ -24,24 +24,24 @@ exports.getUserInfor = async(req,res) => {
     }
 }
 
-exports.createNewUser = async(req, res) => {
+export async function createNewUserController(req, res) {
     try{
-        await userService.createNewUser(req, res);
+        await userServices.createNewUser(req, res);
         res.status(statusCodes.OK).json({message: "Thêm tài khoản người dùng mới thành công"});
     }
     catch(error){
         const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;
         res.status(status).json({ error: error.message || "Lỗi server!" });
     }
-};
+}
 
-exports.blockUser = async(req, res) => {
-    try{
-        await userService.blockUser(req, res);
-        res.status(statusCodes.OK).json({message: "Khóa tài khoản người dùng thành công"});
-    }
-    catch(error){
-        const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;
-        res.status(status).json({ error: error.message || "Lỗi server!" });
-    }
-};
+// export async function blockUserController(req, res) {
+//     try{
+//         await blockUser(req, res);
+//         res.status(statusCodes.OK).json({message: "Khóa tài khoản người dùng thành công"});
+//     }
+//     catch(error){
+//         const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;
+//         res.status(status).json({ error: error.message || "Lỗi server!" });
+//     }
+// }

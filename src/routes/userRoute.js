@@ -1,8 +1,8 @@
-let express = require("express");
-let route = express.Router();
-let userController = require("../controllers/userController");
+import { Router } from "express";
+let userRoute = Router();
+import { editCurrentUser, getUserInfor } from "../controllers/userController.js";
 
-route.put("/edit", userController.editCurrentUser);
-route.get("/get-user", userController.getUserInfor);
+userRoute.put("/edit", editCurrentUser);
+userRoute.get("/get-user", getUserInfor);
 
-module.exports = route;
+export default userRoute;

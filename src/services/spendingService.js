@@ -7,10 +7,9 @@ import SpendingUpdateRecord from '../dto/request/spendingUpdateRecordDTO.js';
 config();  // Load biến môi trường từ .env file
 
 // import SpendingDTO from '../dto/request/spendingAddRecordDTO';  // Import DTO
-import INTERNAL_SERVER_ERROR from '../config/statusCodes.js';
+import statusCodes from '../config/statusCodes.js';
 import AppError from "../config/error.js";
-import { getAll as _getAll, standardDataBeforePush, pushData } from "./commonService.js";
-import { directoryCategory } from "../stores/globalStore.js";
+// import { getAll as _getAll, standardDataBeforePush, pushData } from "./commonService.js";
 
 // Lấy thông tin từ .env
 // const githubToken = process.env.GITHUB_TOKEN;
@@ -22,10 +21,10 @@ import { directoryCategory } from "../stores/globalStore.js";
 // lấy tất cả dữ liệu chi tiêu
 async function getAllSpending(){
     try{
-        return await _getAll(spendingURL);
+        // return await _getAll(spendingURL);
     }
     catch(error){
-        throw new AppError("Lỗi lấy dữ liệu chi tiêu", INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi lấy dữ liệu chi tiêu", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -44,7 +43,7 @@ async function AddNewSpending(req) {
 
     } catch (error) {
         console.error('Error:', error.message);
-        throw new AppError("Thêm Thất Bại", INTERNAL_SERVER_ERROR);
+        throw new AppError("Thêm Thất Bại", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -106,7 +105,7 @@ async function UpdateSpending(req){
     }
     catch(error){
         console.log("Error: ", error);
-        throw new AppError("Lỗi cập nhật bản ghi", INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi cập nhật bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -118,81 +117,81 @@ async function softDeleteSpending(req){
         return await SpendingRepo.softDelete(requestData.id); // xóa mềm trong db
     }
     catch(error){
-        throw new AppError("Lỗi xóa bản ghi", INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
 // tìm kiếm bản ghi theo code hoặc tên sản phẩm
 async function searchRecord(req){
     try{
-        let requestData = req.body;
+        // let requestData = req.body;
 
-        let getAll = await _getAll(spendingURL);
+        // let getAll = await _getAll(spendingURL);
 
-        if(requestData.type === "code"){
-            return getAll.filter(item => item.product.code === requestData.code);
-        }
-        else{
-            // type : name
-            return getAll.filter(item => item.product.name === requestData.name);
-        }
+        // if(requestData.type === "code"){
+        //     return getAll.filter(item => item.product.code === requestData.code);
+        // }
+        // else{
+        //     // type : name
+        //     return getAll.filter(item => item.product.name === requestData.name);
+        // }
     }
     catch(error){
-        throw new AppError("Lỗi tìm kiếm bản ghi", INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi tìm kiếm bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
 // lọc bản ghi theo ngày tháng
 async function filterDateRecord(req){
     try{
-        let requestData = req.body;
-        let startDate = new Date(requestData.startDate);
-        let endDate = new Date(requestData.endDate);
+        // let requestData = req.body;
+        // let startDate = new Date(requestData.startDate);
+        // let endDate = new Date(requestData.endDate);
 
-        let getAll = await _getAll(spendingURL);
+        // let getAll = await _getAll(spendingURL);
 
-        return getAll.filter(record => {
-            let recordDate = new Date(record.product.date);
-            return startDate <= recordDate && recordDate <= endDate;
-        });
+        // return getAll.filter(record => {
+        //     let recordDate = new Date(record.product.date);
+        //     return startDate <= recordDate && recordDate <= endDate;
+        // });
     }
     catch(error){
-        throw new AppError("Lỗi: "+error, INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
 // lọc bản ghi theo thời gian trong ngày
 async function filterTimeRecord(req){
     try{
-        let requestData = req.body;
+        // let requestData = req.body;
 
-        let getAll = await _getAll(spendingURL);
+        // let getAll = await _getAll(spendingURL);
 
-        return getAll.filter(record => {
-            return record.product.time === requestData.time;
-        });
+        // return getAll.filter(record => {
+        //     return record.product.time === requestData.time;
+        // });
     }
     catch(error){
-        throw new AppError("Lỗi: "+error, INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
 // lọc bản ghi theo khoảng chi phí
 async function filterCostRecord(req){
     try{
-        let requestData = req.body;
-        let startCost = parseInt(requestData.startCost);
-        let endCost = parseInt(requestData.endCost);
+        // let requestData = req.body;
+        // let startCost = parseInt(requestData.startCost);
+        // let endCost = parseInt(requestData.endCost);
 
-        let getAll = await _getAll(spendingURL);
+        // let getAll = await _getAll(spendingURL);
 
-        return getAll.filter(record => {
-            let recordCost = parseInt(record.product.cost);
-            return startCost <= recordCost && recordCost <= endCost;
-        });
+        // return getAll.filter(record => {
+        //     let recordCost = parseInt(record.product.cost);
+        //     return startCost <= recordCost && recordCost <= endCost;
+        // });
     }
     catch(error){
-        throw new AppError("Lỗi: "+error, INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -205,7 +204,7 @@ async function getListPlaceBought(placeName){
         // return getAllPlace;
     }
     catch(error){
-        throw new AppError("Lỗi: "+error, INTERNAL_SERVER_ERROR)
+        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR)
     }
 }
 
@@ -245,7 +244,7 @@ async function getListPlaceTomTom(placeName) {
         }
     }
     catch(error){
-        throw new AppError("Lỗi: "+error, INTERNAL_SERVER_ERROR);
+        throw new AppError("Lỗi: "+error, statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 

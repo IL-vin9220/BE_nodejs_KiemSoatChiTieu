@@ -1,10 +1,10 @@
 // middleware/jsonMiddleware.js
-const express = require('express');
+import { json, text } from 'express';
 
 // Middleware để phân tích JSON body
 const jsonMiddleware = [
-    express.json(),
-    express.text({type: 'text/plain'})
+    json(),
+    text({type: 'text/plain'})
 ];
 
-module.exports = jsonMiddleware;
+export default jsonMiddleware;

@@ -1,19 +1,13 @@
-let axios = require("axios");
-let dotenv = require("dotenv");
+import axios from "axios";
+import { config } from "dotenv";
 
-dotenv.config();
+config();
 
-let statusCodes = require("../config/statusCodes");
-let AppError = require("../config/error");
-
-const githubToken = process.env.GITHUB_TOKEN;
-const repoOwner = process.env.GITHUB_USERNAME;
-const repoName = process.env.REPO_NAME;
-
-const spendingURL = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/Database/User2/data1.json`
+import statusCodes from "../config/statusCodes.js";
+import AppError from "../config/error.js";
 
 // thêm danh mục
-async function addCategory(req, res){
+async function addCategory(req){
     try{
         //
     }

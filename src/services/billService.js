@@ -1,24 +1,20 @@
-let dotenv = require("dotenv");
-let axios = require("axios");
-let globalStore = require("../stores/globalStore");
-let AppError = require("../config/error");
-let common = require("../services/commonService");
+import { config } from "dotenv";
+import axios from "axios";
+import { directoryBill } from "../stores/globalStore.js";
+import AppError from "../config/error.js";
+import { getAllDataFile } from "../services/commonService.js";
 
-dotenv.config();
-
-let urlBill = globalStore.directoryBill;
-const repoOwner = process.env.GITHUB_USERNAME;
-const repoName = process.env.REPO_NAME;
+config();
 
 async function addNewItemBill(req, res){
     // lấy ra danh sách file dữ liệu
-    let arrayData = await common.getAllDataFile(urlBill);
+    // let arrayData = await getAllDataFile(urlBill);
 
-    // mỗi năm tạo 1 file data json
-    let now = new Date();
+    // // mỗi năm tạo 1 file data json
+    // let now = new Date();
 
-    if(arrayData.length !== 0){
+    // if(arrayData.length !== 0){
         
-    }
+    // }
 }
 

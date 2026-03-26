@@ -1,13 +1,13 @@
-let express = require('express');
-let router = express.Router();
+import { Router } from 'express';
+let router = Router();
 
-let spendingRoutes = require("./spendingRoute");
-let categoryRoutes = require("./categoryRoute");
-let userRoutes = require("./userRoute");
+import spendingRoute from "./spendingRoute.js";
+import categoryRoute from "./categoryRoute.js";
+import userRoute from "./userRoute.js";
 
-router.use("/spending", spendingRoutes);
-router.use("/category", categoryRoutes);
-router.use("/user", userRoutes);
+router.use("/spending", spendingRoute);
+router.use("/category", categoryRoute);
+router.use("/user", userRoute);
 
 
-module.exports = router;
+export default router;

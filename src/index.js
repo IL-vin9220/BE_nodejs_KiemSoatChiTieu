@@ -1,17 +1,17 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
-const routes = require('./routes/indexRoute');
-let common = require("./controllers/processController");
-const middleware = require("./middleware/middleware");
+import express from 'express';
+import pkg from 'body-parser';
+import { config } from 'dotenv';
+import routes from './routes/indexRoute.js';
+import middleware from "./middleware/middleware.js";
 
-dotenv.config(); // Tải biến môi trường từ file .env
+config(); // Tải biến môi trường từ file .env
 
 const app = express();
+const { json } = pkg;
 
 app.use(middleware);
 
-app.use(bodyParser.json());
+app.use(json());
 
 // Gắn router
 app.use('/api', routes); // Truy cập: POST http://localhost:3000/api/users

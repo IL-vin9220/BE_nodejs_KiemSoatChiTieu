@@ -1,18 +1,18 @@
-const express = require('express');
-const router = express.Router();
-const spendingController = require('../controllers/spendingController');
+import { Router } from 'express';
+const spendingRoute = Router();
+import { getAllData, addNewRecord, updateRecord, softDeleteSpending, searchItemInfor, filterDate, filterTime, filterCost, checkPlaceBought, checkPlaceByTomTom, getAllDataListFile } from '../controllers/spendingController.js';
 
-router.get("/get-all", spendingController.getAllData);
-router.put("/add-new", spendingController.addNewRecord);
-router.put("/update", spendingController.updateRecord);
-router.put("/delete", spendingController.deleteRecord);
-router.get("/search", spendingController.searchItemInfor);
-router.get("/filter-date", spendingController.filterDate);
-router.get("/filter-time", spendingController.filterTime);
-router.get("/filter-cost", spendingController.filterCost);
-router.get("/check-place-bought", spendingController.checkPlaceBought);
-router.get("/check-place-tomtom", spendingController.checkPlaceByTomTom);
+spendingRoute.get("/get-all", getAllData);
+spendingRoute.put("/add-new", addNewRecord);
+spendingRoute.put("/update", updateRecord);
+spendingRoute.put("/delete", softDeleteSpending);
+spendingRoute.get("/search", searchItemInfor);
+spendingRoute.get("/filter-date", filterDate);
+spendingRoute.get("/filter-time", filterTime);
+spendingRoute.get("/filter-cost", filterCost);
+spendingRoute.get("/check-place-bought", checkPlaceBought);
+spendingRoute.get("/check-place-tomtom", checkPlaceByTomTom);
 
-router.get("/get-data-file", spendingController.getAllDataListFile);
+spendingRoute.get("/get-data-file", getAllDataListFile);
 
-module.exports = router;
+export default spendingRoute;

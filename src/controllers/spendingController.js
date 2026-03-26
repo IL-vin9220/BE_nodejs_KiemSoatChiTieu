@@ -1,7 +1,7 @@
 import SpendingService from '../services/spendingService.js';  // Import Service
 import statusCodes from '../config/statusCodes.js';  // Import mã trạng thái
 import AppError from "../config/error.js";  // Import lớp lỗi tùy chỉnh
-import commonService from '../services/commonService.js';  // Import commonService
+// import commonService from '../services/commonService.js';
 
 // GET /api/user – Lấy danh sách người dùng
 export const getAllData = async (res) => {
@@ -37,7 +37,7 @@ export const updateRecord = async (req, res) => {
     }
 };
 
-export const deleteRecord = async (req, res) => {
+export const softDeleteSpending = async (req, res) => {
     try{
         await SpendingService.softDeleteSpending(req);
         res.status(statusCodes.OK).json({message: "Xóa bản ghi thành công"});

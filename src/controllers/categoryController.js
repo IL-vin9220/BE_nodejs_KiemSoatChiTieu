@@ -1,19 +1,19 @@
-let categoryService = require("../services/categoryService");
-let statusCodes = require("../config/statusCodes");
-let AppError = require("../config/error");
+// import { autoCompleteCategory } from "../services/categoryService.js";
+import statusCodes from "../config/statusCodes.js";
+import AppError from "../config/error.js";
 
-exports.autoCategory = async (req, res) => {
+export async function autoCategory(req, res) {
     try{
-        let category = await categoryService.autoCompleteCategory(req, res);
-        res.status(statusCodes.OK).json({message: "Xác định danh mục thành công", data: category});
+        // let category = await autoCompleteCategory(req, res);
+        // res.status(statusCodes.OK).json({message: "Xác định danh mục thành công", data: category});
     }
     catch(error){
         const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;
         res.status(status).json({ error: error.message || "Lỗi server!" });
     }
-};
+}
 
-exports.createCategory = async(req, res) => {
+export async function createCategory(req, res) {
     try{
 
     }
@@ -21,4 +21,4 @@ exports.createCategory = async(req, res) => {
         const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;
         res.status(status).json({ error: error.message || "Lỗi server!" });
     }
-};
+}

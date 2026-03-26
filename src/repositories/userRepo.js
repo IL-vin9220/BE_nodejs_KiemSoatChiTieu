@@ -1,5 +1,4 @@
 import pool from '../config/database.js';
-import user from '../dto/request/userDTO.js';
 
 class UserRepository{
 
@@ -86,3 +85,5 @@ class UserRepository{
         return result.rows[0];
     }
 }
+
+export default UserRepository

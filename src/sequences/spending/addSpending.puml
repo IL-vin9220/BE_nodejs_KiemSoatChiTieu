@@ -1,0 +1,18 @@
+@startuml
+
+actor client
+entity controller
+entity services
+entity repository
+database Database
+
+client -> controller : người dùng ấn nút "Lưu"
+controller -> services : gửi request gồm các thông tin giao dịch
+services -> repository : gửi request đến repo để thực hiện query
+repository -> Database : query db
+Database -> repository : return data
+repository -> services : return data
+services -> controller : return data
+controller -> client : nhận response và hiển thị message
+
+@enduml
