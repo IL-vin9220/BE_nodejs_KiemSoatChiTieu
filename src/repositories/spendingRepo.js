@@ -4,6 +4,8 @@ import spendingAddNewRecordDTO from '../dto/request/spendingAddRecordDTO.js';
 
 class SpendingRepository {
 
+	async getSpendingByID(spending){}
+
 	// thêm mới chi tiêu
 	async addNew(spendingRecord) {
 		const query = `INSERT INTO spending (

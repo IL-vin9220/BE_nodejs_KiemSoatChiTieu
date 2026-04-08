@@ -87,6 +87,7 @@ async function getUser(req){
         return await UserRepository.getUserInfor(newUser);
     }
     catch(error){
+        console.log("error: ", error);
         throw new AppError("Lỗi lấy thông tin tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }

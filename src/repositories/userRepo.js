@@ -11,10 +11,9 @@ class UserRepository{
         sdt,
         name,
         avatar,
-        status,
-        create_at
+        status
 		) 
-		VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *;`;
+		VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;`;
 
         let values = [
             userRecord.username,
@@ -23,8 +22,7 @@ class UserRepository{
             userRecord.sdt,
             userRecord.name,
             userRecord.avatar,
-            userRecord.status,
-            userRecord.createdAt
+            userRecord.status
         ];
 
         const result = await pool.query(query, values);
@@ -72,6 +70,8 @@ class UserRepository{
     }
 
     async getUserInfor(user){
+        // console.log("user raw: ", user);
+
         let query = `
             select * from users where username = $1 and password = $2
         `;
@@ -82,8 +82,9 @@ class UserRepository{
         ];
 
         let result = await pool.query(query, values);
+        // console.log(result);
         return result.rows[0];
     }
 }
 
-export default UserRepository
+export default new UserRepository
