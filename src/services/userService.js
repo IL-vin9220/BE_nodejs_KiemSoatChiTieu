@@ -77,12 +77,14 @@ async function editUser(req){
 async function getUser(req){
     try{
         let newUser = new userDTO();
-        newUser.username = req.username;
-        newUser.password = req.password;
-        newUser.email = req.email;
-        newUser.sdt = req.sdt;
-        newUser.name = req.name;
-        newUser.avatar = req.avatar;
+        newUser.username = req.body.username;
+        newUser.password = req.body.password;
+        newUser.email = req.body.email;
+        newUser.sdt = req.body.sdt;
+        newUser.name = req.body.name;
+        newUser.avatar = req.body.avatar;
+
+        console.log(req.body);
 
         return await UserRepository.getUserInfor(newUser);
     }
