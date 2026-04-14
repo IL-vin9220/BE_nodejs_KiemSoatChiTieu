@@ -32,7 +32,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 // middleware của bạn
-app.use(middleware);
+// app.use(middleware);
 
 // routes
 app.use("/api", routes);

@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import AppError from "../config/error.js";
 import statusCodes from "../config/statusCodes.js";
 import userDTO from "../dto/request/userDTO.js";
+import { generateToken } from "../utils/jwt.js";
 // import { getAll, standardDataBeforePush, pushData } from "../services/commonService.js";
 import UserRepository from "../repositories/userRepo.js"
 
@@ -94,8 +95,29 @@ async function getUser(req){
     }
 }
 
+async function login(req){
+    try{
+        let userLogin = new userDTO();
+        userLogin.username = req.body.username;
+        userLogin.password = req.body.password;
+
+        // query db
+        let isSuccess = UserRepository.getUserInfor(userLogin);
+
+        if(!isSuccess) return;
+
+        let token = generateToken({userId: isSuccess.id});
+
+        return {token};
+    }
+    catch(error){
+        throw new AppError("Lỗi lấy thông tin tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
 export default {
     createNewUser,
     editUser,
     getUser,
+    login,
 };

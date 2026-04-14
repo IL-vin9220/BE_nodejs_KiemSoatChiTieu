@@ -35,6 +35,26 @@ export async function createNewUserController(req, res) {
     }
 }
 
+export async function login(req, res){
+    try{
+        let requestLogin = userServices.login(req);
+
+        console.log("set cookie");
+        res.cookie("accessToken", requestLogin.token, {
+            httpOnly: true,
+            secure: false,
+            sameSite: "Lax",
+            maxAge: 60*60*1000
+        });
+
+        res.json({message: "Login Thành Công"});
+    }
+    catch(error){
+        const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;
+        res.status(status).json({ error: error.message || "Lỗi server!" });
+    }
+}
+
 // export async function blockUserController(req, res) {
 //     try{
 //         await blockUser(req, res);

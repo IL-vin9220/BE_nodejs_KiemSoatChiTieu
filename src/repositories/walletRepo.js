@@ -1,7 +1,7 @@
 import pool from '../config/database.js';
 import walletDTO from '../dto/request/walletDTO.js';
 
-class wallet{
+class walletRepository{
 
     async getWallet(userID){
         let query = `
@@ -137,5 +137,16 @@ class wallet{
     // tính toán lại số dư của ví khi có phát sinh giao dịch
     // async caculateBalanceWallet(wallet){}
 
+    async calculateAmountWalletsActiveByUserId(userId){
+        let query = `
+            select amount from wallet where user_id = $1 and status_active = 1
+        `;
+
+        let result = await pool.query(query, userId);
+        return result.rows[0];
+    }
+
 
 }
+
+export default walletRepository
