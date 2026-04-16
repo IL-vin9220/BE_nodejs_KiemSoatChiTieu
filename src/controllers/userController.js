@@ -37,17 +37,18 @@ export async function createNewUserController(req, res) {
 
 export async function login(req, res){
     try{
-        let requestLogin = userServices.login(req);
+        let requestLogin = await userServices.login(req.body);
 
-        console.log("set cookie");
         res.cookie("accessToken", requestLogin.token, {
             httpOnly: true,
             secure: false,
-            sameSite: "Lax",
+            sameSite: "lax",
             maxAge: 60*60*1000
         });
 
-        res.json({message: "Login Thành Công"});
+        return res.json({
+            message: "Login Thành Công"
+        });
     }
     catch(error){
         const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;

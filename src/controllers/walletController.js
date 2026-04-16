@@ -16,8 +16,8 @@ export async function getAllAmountWalletActiveByUserId(req, res) {
     try{
         let userId = req.user.userId;
 
-        walletService.getAllAmountWalletByUserIDAndActive(userId);
-        res.status(statusCodes.OK).json({message: "SUCCESS", data: walletServices});
+        let totalAmount = await walletService.getAllAmountWalletByUserIDAndActive(userId);
+        res.status(statusCodes.OK).json({message: "SUCCESS", data: totalAmount});
     }
     catch(error){
 

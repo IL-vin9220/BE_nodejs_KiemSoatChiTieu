@@ -9,6 +9,7 @@ config();  // Load biến môi trường từ .env file
 // import SpendingDTO from '../dto/request/spendingAddRecordDTO';  // Import DTO
 import statusCodes from '../config/statusCodes.js';
 import AppError from "../config/error.js";
+import spendingRepo from '../repositories/spendingRepo.js';
 // import { getAll as _getAll, standardDataBeforePush, pushData } from "./commonService.js";
 
 // Lấy thông tin từ .env
@@ -306,6 +307,29 @@ async function autoCompleteCategory(spendingList){
 
 }
 
+async function filterRecord(dataRequest, userId){
+    let typeTransaction = dataRequest.typeTransaction;
+    let now = new Date();
+    let startTime = new Date();
+    let endTime = new Date();
+
+    if(typeTransaction == "expense"){
+        if(dataRequest.time == "thisMonth"){
+            startTime = new Date(now.getFullYear, now.getMonth(), 1);
+            endTime = new Date(now.getFullYear, now.getMonth()+1, 1);
+            let totalAmountTransaction = await spendingRepo.transactionExpenseType(startTime, endTime, userId);
+            return totalAmountTransaction;
+        }
+        else if(dataRequest.time == "thisYear"){
+            startTime = new Date(now.getFullYear, 0, 1);
+            endTime = new Date(now.getFullYear+1, 0, 1);
+            let totalAmountTransaction = await spendingRepo.transactionExpenseType(startTime, endTime, userId);
+            return totalAmountTransaction;
+        }
+    }
+    
+}
+
 export default { 
     getAllSpending,
     AddNewSpending,
@@ -318,4 +342,5 @@ export default {
     filterCostRecord,
     getListPlaceBought,
     getListPlaceTomTom,
+    filterRecord,
 };

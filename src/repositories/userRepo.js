@@ -81,8 +81,6 @@ class UserRepository{
             user.password
         ];
 
-        console.log("values: ", values);
-
         let result = await pool.query(query, values);
         // console.log(result);
         return result.rows[0];

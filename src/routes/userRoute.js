@@ -3,8 +3,8 @@ let userRoute = Router();
 import { editCurrentUser, getUserInfor, login } from "../controllers/userController.js";
 import authMiddleware from "../middleware/middleware.js"
 
-userRoute.put("/edit", editCurrentUser);
-userRoute.post("/get-user", getUserInfor);
+userRoute.put("/edit", authMiddleware, editCurrentUser);
+userRoute.post("/get-user", authMiddleware, getUserInfor);
 userRoute.post("/login", login);
 
 export default userRoute;

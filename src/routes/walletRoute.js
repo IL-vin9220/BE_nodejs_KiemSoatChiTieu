@@ -6,7 +6,7 @@ import {
 import authMiddleware from "../middleware/middleware.js"
 
 walletRoute.put("/wallet", authMiddleware, getAllWallet);
-walletRoute.post("/amountWalletActive", authMiddleware, getAllAmountWalletActiveByUserId);
+walletRoute.get("/amountWalletActive", authMiddleware, getAllAmountWalletActiveByUserId);
 // walletRoute.post("/login", login);
 
 export default walletRoute;

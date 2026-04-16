@@ -142,11 +142,12 @@ class walletRepository{
             select amount from wallet where user_id = $1 and status_active = 1
         `;
 
-        let result = await pool.query(query, userId);
-        return result.rows[0];
+        let result = await pool.query(query, [userId]);
+
+        return result.rows;
     }
 
 
 }
 
-export default walletRepository
+export default new walletRepository();

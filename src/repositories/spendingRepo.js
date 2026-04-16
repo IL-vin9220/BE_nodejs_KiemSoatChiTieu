@@ -98,6 +98,18 @@ class SpendingRepository {
 		return result.rows.map(row => new spendingFilterDTO(row));
 	}
 
+	async transactionExpenseType(startTime, endTime, userId){
+		let query = `
+			select transaction_amount from transaction_detail td
+			inner join transactions t on t.id_transaction = td.id_transaction 
+			inner join category c on td.category_id = c.id
+			where t.user_id = $1 and c.type = 'expense' and td.deleted_at is null and td.updated_at >= $2 and td.updated_at < $3
+		`;
+
+		let result = await pool.query(query, [userId, startTime, endTime]);
+		return result.rows;
+	}
+
 	// cập nhật bản ghi chi tiêu
 	async update(updateDTO, userId) {
 		const query = `

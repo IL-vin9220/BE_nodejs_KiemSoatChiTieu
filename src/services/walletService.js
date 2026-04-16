@@ -1,5 +1,6 @@
 import walletRepository from "../repositories/walletRepo.js";
 import statusCodes from "../config/statusCodes.js";
+import AppError from "../config/error.js";
 
 async function getAllWallet(userId){
     try{
@@ -15,7 +16,7 @@ async function getAllWallet(userId){
 
 async function getAllAmountWalletByUserIDAndActive(userId) {
     try{
-        let dataResponseDB = walletRepository.calculateAmountWalletsActiveByUserId(userId);
+        let dataResponseDB = await walletRepository.calculateAmountWalletsActiveByUserId(userId.toString());
 
         return dataResponseDB;
 

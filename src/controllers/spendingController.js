@@ -59,10 +59,14 @@ export const searchItemInfor = async (req, res) => {
     }
 };
 
-export const filterDate = async (req, res) => {
+export const filterRecord = async (req, res) => {
     try{
-        let filterDate = await SpendingService.filterDateRecord(req);
-        res.status(statusCodes.OK).json({message: "Lọc bản ghi theo ngày thành công", data: filterDate});
+        // let filterDate = await SpendingService.filterDateRecord(req);
+        let dataRequest = req.body;
+        let userId = req.user.userId;
+        let filterResult = await  SpendingService.filterRecord(dataRequest, userId);
+        console.log("data: ", filterResult);
+        res.status(statusCodes.OK).json({message: "Lọc bản ghi thành công", data: filterResult??[]});
     }
     catch(error){
         const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;

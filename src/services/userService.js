@@ -95,18 +95,20 @@ async function getUser(req){
     }
 }
 
-async function login(req){
+async function login(userRequest){
     try{
         let userLogin = new userDTO();
-        userLogin.username = req.body.username;
-        userLogin.password = req.body.password;
+        userLogin.username = userRequest.username;
+        userLogin.password = userRequest.password;
 
         // query db
-        let isSuccess = UserRepository.getUserInfor(userLogin);
+        let isSuccess = await UserRepository.getUserInfor(userLogin);
 
         if(!isSuccess) return;
 
-        let token = generateToken({userId: isSuccess.id});
+        let token = generateToken({
+            userId: isSuccess.id,
+        });
 
         return {token};
     }
