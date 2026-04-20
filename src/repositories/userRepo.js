@@ -8,24 +8,19 @@ class UserRepository{
 		username,
         password,
         email,
-        sdt,
-        name,
-        avatar,
-        status
+        sdt
 		) 
-		VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;`;
+		VALUES ($1,$2,$3,$4) RETURNING *;`;
 
         let values = [
             userRecord.username,
             userRecord.password,
             userRecord.email,
-            userRecord.sdt,
-            userRecord.name,
-            userRecord.avatar,
-            userRecord.status
+            userRecord.sdt
         ];
 
         const result = await pool.query(query, values);
+        console.log(result);
         return result.rows[0];
     }
 
@@ -48,7 +43,7 @@ class UserRepository{
             update users set
                 username = $1,
                 password = $2,
-                email = $3
+                email = $3,
                 sdt = $4,
                 name = $5,
                 avatar = $6
@@ -69,16 +64,15 @@ class UserRepository{
         return result.rows[0];
     }
 
-    async getUserInfor(user){
+    async getUserInfor(id){
         // console.log("user raw: ", user);
 
         let query = `
-            select * from users where username = $1 and password = $2
+            select * from users where users.id = $1
         `;
 
         let values = [
-            user.username,
-            user.password
+            id
         ];
 
         let result = await pool.query(query, values);

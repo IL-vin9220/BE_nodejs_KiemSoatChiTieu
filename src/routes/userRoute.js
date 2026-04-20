@@ -1,10 +1,16 @@
 import { Router } from "express";
 let userRoute = Router();
-import { editCurrentUser, getUserInfor, login } from "../controllers/userController.js";
+import { 
+    editCurrentUser, 
+    getUserInfor, 
+    login,
+    createNewUserController,
+} from "../controllers/userController.js";
 import authMiddleware from "../middleware/middleware.js"
 
-userRoute.put("/edit", authMiddleware, editCurrentUser);
-userRoute.post("/get-user", authMiddleware, getUserInfor);
+userRoute.put("/edit", editCurrentUser);
+userRoute.get("/get-user", getUserInfor);
 userRoute.post("/login", login);
+userRoute.post("/add-new", createNewUserController);
 
 export default userRoute;

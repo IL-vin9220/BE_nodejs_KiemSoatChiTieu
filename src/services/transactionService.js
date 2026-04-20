@@ -1,51 +1,94 @@
 import axios from 'axios';
-import { config } from 'dotenv';  // Import dotenv
-import SpendingRepo from '../repositories/spendingRepo.js';
-import SpendingAddRecord from '../dto/request/spendingAddRecordDTO.js';
-import SpendingUpdateRecord from '../dto/request/spendingUpdateRecordDTO.js';
+// import SpendingAddRecord from '../dto/request/spendingAddRecordDTO.js';
+// import SpendingUpdateRecord from '../dto/request/spendingUpdateRecordDTO.js';
 
-config();  // Load biến môi trường từ .env file
-
-// import SpendingDTO from '../dto/request/spendingAddRecordDTO';  // Import DTO
 import statusCodes from '../config/statusCodes.js';
 import AppError from "../config/error.js";
-import spendingRepo from '../repositories/spendingRepo.js';
+import transactionRepo from '../repositories/transactionRepo.js';
+import transactionDetailRepo from '../repositories/transactionDetailRepo.js';
 // import { getAll as _getAll, standardDataBeforePush, pushData } from "./commonService.js";
 
-// Lấy thông tin từ .env
-// const githubToken = process.env.GITHUB_TOKEN;
-// const repoOwner = process.env.GITHUB_USERNAME;
-// const repoName = process.env.REPO_NAME;
-
-// const spendingURL = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/data/Database/User2/data1.json`;
-
 // lấy tất cả dữ liệu chi tiêu
-async function getAllSpending(){
+async function getTransactionByPage(limit, page, userId){
     try{
-        // return await _getAll(spendingURL);
+        limit = limit*page;
+        let offset = limit*(page-1);
+        let getTransactionByPage = await transactionRepo.getTransactionByPage(limit, offset, userId);
+        return getTransactionByPage;
     }
     catch(error){
-        throw new AppError("Lỗi lấy dữ liệu chi tiêu", statusCodes.INTERNAL_SERVER_ERROR);
+        console.log(error);
+        throw new AppError("Lỗi lấy dữ liệu giao dịch", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
 // thêm mới bản ghi chi tiêu
-async function AddNewSpending(req) {
+async function AddNewTransaction(transactions, userId) {
     try {
-        let originData = req.body;
-
-        // format lại theo dto
-        let spendingRecord = new SpendingAddRecord(
-            originData
+        let totalAmount = transactions.reduce(
+            (sum, t) => sum + Number(t.amount.replace(/,/g, "")),
+            0
         );
 
-        // thêm vào db
-        return await SpendingRepo.addNew(spendingRecord);
+        let amountArray = transactions.amount.split(",");
+        let transactionArray = transactions.name.split(",");
+        let maxLength = amountArray.length<transactionArray.length?amountArray.length:transactionArray.length;
 
+        let Code = await getCodeTransaction(maxLength);
+
+        let transactionRoot = {
+            "code": Code.transactionCode,
+            "amount": totalAmount,
+            "time": transactions.time,
+            "date": transactions.date,
+            "placeName": transactions.placeName,
+            "placeLocation": transactions.placeLocation,
+            "placeAddress": transactions.placeAddress,
+            "note": transactions.note
+        }
+
+        let transactionDetail = {
+            
+        }
+        // thêm vào db
+        await transactionRepo.addNew(transactions, userId);
+        await transactionDetailRepo.addNew();
     } catch (error) {
         console.error('Error:', error.message);
         throw new AppError("Thêm Thất Bại", statusCodes.INTERNAL_SERVER_ERROR);
     }
+}
+
+// lấy ra dữ liệu setting về mã của người dùng
+function getCodeTransaction(length){
+    // lấy setting về transaction và transaction_detail
+    let setting = await transactionRepo.settingTransaction();
+
+    // fallback nếu không có setting
+    if (!setting || setting.length == 0) {
+        setting = {
+            transaction: "T"+ (new Date()).toLocaleDateString('en-US', {month: 'short'}) + (new Date()).getFullYear(),
+            transaction_number: 1,
+            transaction_detail: "T"+ (new Date()).toLocaleDateString('en-US', {month: 'short'}) + (new Date()).getFullYear() + "D",
+            transaction_detail_number: 1
+        };
+    }
+
+    // code cho transaction chính
+    const transactionCode = setting.transaction + setting.transaction_number;
+
+    // generate danh sách detail code
+    const transactionDetailCode = Array.from({ length }, (_, i) => {
+        return (
+        setting.transaction_detail +
+        (setting.transaction_detail_number + i)
+        );
+    });
+
+    return {
+        transactionCode,
+        transactionDetailCode
+    };
 }
 
 // chuyển đổi dữ liệu đầu vào thành định dạng phù hợp với DTO
@@ -102,7 +145,7 @@ async function UpdateSpending(req){
         console.log("Spending Record: ", spendingRecord);
 
         // cập nhật vào db
-        return await SpendingRepo.update(spendingRecord, 1);
+        return await transactionRepo.update(spendingRecord, 1);
     }
     catch(error){
         console.log("Error: ", error);
@@ -115,7 +158,7 @@ async function softDeleteSpending(req){
     try{
         let requestData = req.body;
 
-        return await SpendingRepo.softDelete(requestData.id); // xóa mềm trong db
+        return await transactionRepo.softDelete(requestData.id); // xóa mềm trong db
     }
     catch(error){
         throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
@@ -317,13 +360,13 @@ async function filterRecord(dataRequest, userId){
         if(dataRequest.time == "thisMonth"){
             startTime = new Date(now.getFullYear, now.getMonth(), 1);
             endTime = new Date(now.getFullYear, now.getMonth()+1, 1);
-            let totalAmountTransaction = await spendingRepo.transactionExpenseType(startTime, endTime, userId);
+            let totalAmountTransaction = await transactionRepo.transactionExpenseType(startTime, endTime, userId);
             return totalAmountTransaction;
         }
         else if(dataRequest.time == "thisYear"){
             startTime = new Date(now.getFullYear, 0, 1);
             endTime = new Date(now.getFullYear+1, 0, 1);
-            let totalAmountTransaction = await spendingRepo.transactionExpenseType(startTime, endTime, userId);
+            let totalAmountTransaction = await transactionRepo.transactionExpenseType(startTime, endTime, userId);
             return totalAmountTransaction;
         }
     }
@@ -331,8 +374,8 @@ async function filterRecord(dataRequest, userId){
 }
 
 export default { 
-    getAllSpending,
-    AddNewSpending,
+    getTransactionByPage,
+    AddNewTransaction,
     UpdateSpending,
     softDeleteSpending,
     // DeleteSpending,

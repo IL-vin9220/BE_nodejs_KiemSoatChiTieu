@@ -2,44 +2,49 @@ import pool from '../config/database.js';
 import spendingFilterDTO from '../dto/response/spendingFilter.js';
 import spendingAddNewRecordDTO from '../dto/request/spendingAddRecordDTO.js';
 
-class SpendingRepository {
+class transactionRepository {
 
-	async getSpendingByID(spending){}
+	async getTransactionByPage(limit, offset, userId){
+		let query = `
+			select * from transactions where user_id = $1 order by transaction_date desc limit $2 offset $3
+		`;
+
+		let values = [
+			userId,
+			limit,
+			offset
+		];
+
+		let result = pool.query(query, values);
+		return (await result).rows;
+	}
 
 	// thêm mới chi tiêu
-	async addNew(spendingRecord) {
-		const query = `INSERT INTO spending (
-		code, 
-		spending_name, 
-		amount,
-		spending_time, 
-		spending_date,
+	async addNew(transactions, userId) {
+		const query = `INSERT INTO transactions (
+		transaction_code,
+		transaction_total_amount,
+		transaction_time, 
+		transaction_date,
 		place_name,
 		place_location,
 		place_address,
-		note,
-		category_id,
+		transaction_note,
 		user_id
 		) 
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *;`;
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *;`;
 
 		const values = [
-			spendingRecord.code,
-			spendingRecord.name,
-			spendingRecord.amount,
-			spendingRecord.time,
-			spendingRecord.date,
-			spendingRecord.placeName,
-			spendingRecord.placeLocation,
-			spendingRecord.placeAddress,
-			spendingRecord.note,
-			spendingRecord.categoryID,
-			spendingRecord.user_id
+			transactions.code,
+			transactions.amount,
+			transactions.time,
+			transactions.date,
+			transactions.placeName,
+			transactions.placeLocation,
+			transactions.placeAddress,
+			transactions.note,
+			userId
 		];
-
-		// console.log(query);
-		// console.log(values.length);
-		// console.log(spendingRecord.code);
 
 		const result = await pool.query(query, values);
 		return result.rows[0];
@@ -204,4 +209,4 @@ class SpendingRepository {
 
 }
 
-export default new SpendingRepository();
+export default new transactionRepository();

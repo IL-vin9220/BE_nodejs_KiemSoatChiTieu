@@ -4,7 +4,10 @@ import AppError from "../config/error.js";
 
 export async function editCurrentUser(req, res) {
     try{
-        await userServices.editUser(req, res);
+        // let userId = req.user.userId;
+        let userId = 1;
+        let userDataEdit = req.body;
+        await userServices.editUser(userDataEdit, userId);
         res.status(statusCodes.OK).json({message: "Cập nhật thông tin user thành công"});
     }
     catch(error){
@@ -15,7 +18,9 @@ export async function editCurrentUser(req, res) {
 
 export async function getUserInfor(req,res) {
     try{
-        let currentUser = await userServices.getUser(req, res);
+        // let userId = req.user.userId;
+        let userId = 1;
+        let currentUser = await userServices.getUser(userId);
         res.status(statusCodes.OK).json({message: "Thông tin người dùng", data: currentUser});
     }
     catch(error){
@@ -26,7 +31,8 @@ export async function getUserInfor(req,res) {
 
 export async function createNewUserController(req, res) {
     try{
-        await userServices.createNewUser(req, res);
+        let dataRequest = req.body;
+        await userServices.createNewUser(dataRequest);
         res.status(statusCodes.OK).json({message: "Thêm tài khoản người dùng mới thành công"});
     }
     catch(error){

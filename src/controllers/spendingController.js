@@ -1,22 +1,34 @@
-import SpendingService from '../services/spendingService.js';  // Import Service
+import transactionServices from '../services/transactionService.js';  // Import Service
 import statusCodes from '../config/statusCodes.js';  // Import mã trạng thái
 import AppError from "../config/error.js";  // Import lớp lỗi tùy chỉnh
 // import commonService from '../services/commonService.js';
 
 // GET /api/user – Lấy danh sách người dùng
-export const getAllData = async (res) => {
+export const getTransactionByPage = async (req, res) => {
     try {
-        let getAllSpending = await SpendingService.getAllSpending();  // Dùng await nếu hàm trả về Promise
-        res.status(statusCodes.OK).json(getAllSpending);  // Trả về dữ liệu
+        // let userId = req.user.userId;;
+        let userId = 1;
+        let limit = parseInt(req.query.limit, 10);
+        let page = parseInt(req.query.page, 10);
+
+        // default fallback
+        if (isNaN(limit) || limit <= 0) limit = 10;
+        if (isNaN(page) || page <= 0) page = 1;
+
+        let getTransaction_ByPage = await transactionServices.getTransactionByPage(limit, page, userId);  // Dùng await nếu hàm trả về Promise
+        res.status(statusCodes.OK).json({message: "Lấy bản ghi giao dịch thành công", data: getTransaction_ByPage});  // Trả về dữ liệu
     } catch (error) {
         console.error('Lỗi khi lấy dữ liệu:', error);
         res.status(statusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Có lỗi khi lấy dữ liệu' });
     }
 };
 
-export const addNewRecord = async (req, res) => {
+export const AddNewTransaction = async (req, res) => {
     try{
-        await SpendingService.AddNewSpending(req);
+        // let userId = req.user.userId;
+        let userId = 1;
+        let transactionRequest = req.body;
+        await transactionServices.AddNewTransaction(transactionRequest, userId);
         res.status(statusCodes.OK).json({message: "Thêm mới bản ghi thành công"});
     }
     catch(error){
@@ -28,7 +40,7 @@ export const addNewRecord = async (req, res) => {
 
 export const updateRecord = async (req, res) => {
     try{
-        await SpendingService.UpdateSpending(req);
+        await transactionServices.UpdateSpending(req);
         res.status(statusCodes.OK).json({message: "Cập nhật bản ghi thành công"});
     }
     catch(error){
@@ -39,7 +51,7 @@ export const updateRecord = async (req, res) => {
 
 export const softDeleteSpending = async (req, res) => {
     try{
-        await SpendingService.softDeleteSpending(req);
+        await transactionServices.softDeleteSpending(req);
         res.status(statusCodes.OK).json({message: "Xóa bản ghi thành công"});
     }
     catch(error){
@@ -50,7 +62,7 @@ export const softDeleteSpending = async (req, res) => {
 
 export const searchItemInfor = async (req, res) => {
     try{
-        let searchRes = await SpendingService.searchRecord(req);
+        let searchRes = await transactionServices.searchRecord(req);
         res.status(statusCodes.OK).json({message: "Đã Tìm Thấy Bản Ghi", data: searchRes});
     }
     catch(error){
@@ -61,10 +73,10 @@ export const searchItemInfor = async (req, res) => {
 
 export const filterRecord = async (req, res) => {
     try{
-        // let filterDate = await SpendingService.filterDateRecord(req);
+        // let filterDate = await transactionServices.filterDateRecord(req);
         let dataRequest = req.body;
         let userId = req.user.userId;
-        let filterResult = await  SpendingService.filterRecord(dataRequest, userId);
+        let filterResult = await  transactionServices.filterRecord(dataRequest, userId);
         console.log("data: ", filterResult);
         res.status(statusCodes.OK).json({message: "Lọc bản ghi thành công", data: filterResult??[]});
     }
@@ -76,7 +88,7 @@ export const filterRecord = async (req, res) => {
 
 export const filterTime = async (req, res) => {
     try{
-        let filterTime = await SpendingService.filterTimeRecord(req);
+        let filterTime = await transactionServices.filterTimeRecord(req);
         res.status(statusCodes.OK).json({message: "Lọc bản ghi theo thời gian thành công", data: filterTime});
     }
     catch(error){
@@ -87,7 +99,7 @@ export const filterTime = async (req, res) => {
 
 export const filterCost = async (req, res) => {
     try{
-        let filterCost = await SpendingService.filterCostRecord(req);
+        let filterCost = await transactionServices.filterCostRecord(req);
         res.status(statusCodes.OK).json({message: "Lọc bản ghi theo giá mua thành công", data: filterCost});
     }
     catch(error){
@@ -111,7 +123,7 @@ export const getAllDataListFile = async(req, res) => {
 export const checkPlaceBought = async(req, res) => {
     try{
         let textPlace = req.body;
-        let placeByTomTom = SpendingService.getListPlaceBought(textPlace);
+        let placeByTomTom = transactionServices.getListPlaceBought(textPlace);
         res.status(statusCodes.OK).json({message: "Danh sách kết quả nơi mua đã có", data: placeByTomTom});
     }
     catch(error){
@@ -123,7 +135,7 @@ export const checkPlaceBought = async(req, res) => {
 export const checkPlaceByTomTom = async(req, res) => {
     try{
         let textPlace = req.body;
-        let placeByTomTom = SpendingService.getListPlaceTomTom(textPlace);
+        let placeByTomTom = transactionServices.getListPlaceTomTom(textPlace);
         res.status(statusCodes.OK).json({message: "Danh sách kết quả vị trí", data: placeByTomTom});
     }
     catch(error){

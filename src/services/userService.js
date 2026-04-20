@@ -10,38 +10,31 @@ import UserRepository from "../repositories/userRepo.js"
 config();
 
 // thêm mới người dùng
-async function createNewUser(req){
+async function createNewUser(user){
     try{
-        let newUser = new userDTO();
-        newUser.username = req.username;
-        newUser.password = req.password;
-        newUser.email = req.email;
-        newUser.sdt = req.sdt;
-        newUser.status = 1;
+        console.log("------------------------");
+        let newUser = await UserRepository.addNewUser(user);
+        console.log(newUser);
 
-        return await UserRepository.addNewUser(newUser);
+        return newUser;
     }
     catch(error){
+        console.log(error);
+        if (error.code === '23505') {
+            throw new Error("Tài khoản người dùng đã tồn tại");
+        }
         throw new AppError("Lỗi tạo mới tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
 // sửa thông tin người dùng
-async function editUser(req){
+async function editUser(userData, userId){
     try{
-
-        let newUser = new userDTO();
-        newUser.username = req.username;
-        newUser.password = req.password;
-        newUser.email = req.email;
-        newUser.sdt = req.sdt;
-        newUser.name = req.name;
-        newUser.avatar = req.avatar;
-
-        return await UserRepository.updateUser(newUser);
-
+        let userNew = await UserRepository.updateUser(userData, userId);
+        return userNew;
     }
     catch(error){
+        console.log(error);
         throw new AppError("Lỗi cập nhật thông tin người dùng", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
@@ -75,19 +68,9 @@ async function editUser(req){
 // }
 
 // lấy thông tin người dùng
-async function getUser(req){
+async function getUser(userId){
     try{
-        let newUser = new userDTO();
-        newUser.username = req.body.username;
-        newUser.password = req.body.password;
-        newUser.email = req.body.email;
-        newUser.sdt = req.body.sdt;
-        newUser.name = req.body.name;
-        newUser.avatar = req.body.avatar;
-
-        console.log(req.body);
-
-        return await UserRepository.getUserInfor(newUser);
+        return await UserRepository.getUserInfor(userId);
     }
     catch(error){
         console.log("error: ", error);
