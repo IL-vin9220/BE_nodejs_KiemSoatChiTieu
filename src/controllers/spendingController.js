@@ -40,7 +40,10 @@ export const AddNewTransaction = async (req, res) => {
 
 export const updateRecord = async (req, res) => {
     try{
-        await transactionServices.UpdateSpending(req);
+        // let userId = req.user.userId;
+        let userId = 1;
+        let transactionRequest = req.body;
+        await transactionServices.UpdateTransaction(transactionRequest, userId);
         res.status(statusCodes.OK).json({message: "Cập nhật bản ghi thành công"});
     }
     catch(error){

@@ -32,7 +32,7 @@ class transactionRepository {
 		transaction_note,
 		user_id
 		) 
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *;`;
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id_transaction;`;
 
 		const values = [
 			transactions.code,
@@ -118,20 +118,20 @@ class transactionRepository {
 	// cập nhật bản ghi chi tiêu
 	async update(updateDTO, userId) {
 		const query = `
-		UPDATE spending
+		UPDATE transactions
 		SET 
 			code = $1,
 			spending_name = $2,
-			amount = $3,
-			spending_time = $4,
-			spending_date = $5,
+			transaction_amount = $3,
+			transaction_time = $4,
+			transaction_date = $5,
 			place_name = $6,
 			place_location = $7,
 			place_address = $8,
 			note = $9,
 			category_id = $10,
 			updated_at = CURRENT_TIMESTAMP
-		WHERE id = $11
+		WHERE id_transaction = $11
 		AND user_id = $12
 		AND deleted_at IS NULL
 		RETURNING *;
@@ -154,6 +154,31 @@ class transactionRepository {
 
 		const result = await pool.query(query, values);
 
+		return result.rows[0];
+	}
+
+	// lấy ra tổng số tiền của bản ghi gốc
+	async getTotalAmount(idTransaction, userId){
+		let query = `
+			select transaction_total_amount from transactions where id_transaction = $1 and user_id = $2
+		`;
+
+		let values = [idTransaction, userId];
+
+		let result = pool.query(query, values);
+		return result.rows[0]
+	}
+
+	async updateInDay(transactionUpdate, userId){
+		let query = `
+			update transactions set
+			transaction_total_amount = $1
+			where user_id = $2 and id_transaction = $3 and deleted_at is null
+		`;
+
+		let values = [transactionUpdate.amount, userId, transactionUpdate.idTransaction];
+
+		let result = await pool.query(query, values);
 		return result.rows[0];
 	}
 
@@ -205,6 +230,41 @@ class transactionRepository {
 
 		const result = await pool.query(query, [`%${placeName}%`]);
 		return result.rows;
+	}
+
+	async settingTransaction(userId){
+		let query = `
+			select transaction_prefix, transaction_number, transaction_detail_prefix, transaction_detail_number
+			from setting
+			where user_id = $1
+		`;
+
+		let values = [userId];
+
+		let result = await pool.query(query, values);
+		return result.rows[0];
+	}
+
+	async updateNumberTrans(trans_number, trans_detail_number, userId){
+		let query = `
+		INSERT INTO setting (
+			user_id,
+			transaction_number,
+			transaction_detail_number
+		)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (user_id)
+		DO UPDATE SET
+			transaction_number = EXCLUDED.transaction_number,
+			transaction_detail_number = EXCLUDED.transaction_detail_number
+		RETURNING *;
+		`;
+
+
+		let values = [userId, trans_number, trans_detail_number];
+
+		let result = await pool.query(query, values);
+		return result.rows[0];
 	}
 
 }

@@ -17,7 +17,7 @@ async function getTransactionByPage(limit, page, userId){
         return getTransactionByPage;
     }
     catch(error){
-        console.log(error);
+        console.error(error);
         throw new AppError("Lỗi lấy dữ liệu giao dịch", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
@@ -25,16 +25,13 @@ async function getTransactionByPage(limit, page, userId){
 // thêm mới bản ghi chi tiêu
 async function AddNewTransaction(transactions, userId) {
     try {
-        let totalAmount = transactions.reduce(
-            (sum, t) => sum + Number(t.amount.replace(/,/g, "")),
-            0
-        );
+        let totalAmount = sumAmounts(transactions.amount);
 
         let amountArray = transactions.amount.split(",");
         let transactionArray = transactions.name.split(",");
         let maxLength = amountArray.length<transactionArray.length?amountArray.length:transactionArray.length;
 
-        let Code = await getCodeTransaction(maxLength);
+        let Code = await getCodeTransaction(maxLength, userId);
 
         let transactionRoot = {
             "code": Code.transactionCode,
@@ -47,12 +44,23 @@ async function AddNewTransaction(transactions, userId) {
             "note": transactions.note
         }
 
-        let transactionDetail = {
-            
-        }
         // thêm vào db
-        await transactionRepo.addNew(transactions, userId);
-        await transactionDetailRepo.addNew();
+        let idTransaction = await transactionRepo.addNew(transactionRoot, userId);
+
+        let transactionDetail = {
+            "name": transactions.name,
+            "amount": transactions.amount,
+            "categoryId": transactions.categoryId
+        }
+        
+        await addNewTransactionDetail(
+            transactionDetail, 
+            Code.transaction_number, 
+            Code.transaction_detail_number, 
+            idTransaction, 
+            Code.transactionDetailCode,
+            userId
+        );
     } catch (error) {
         console.error('Error:', error.message);
         throw new AppError("Thêm Thất Bại", statusCodes.INTERNAL_SERVER_ERROR);
@@ -60,35 +68,95 @@ async function AddNewTransaction(transactions, userId) {
 }
 
 // lấy ra dữ liệu setting về mã của người dùng
-function getCodeTransaction(length){
-    // lấy setting về transaction và transaction_detail
-    let setting = await transactionRepo.settingTransaction();
+async function getCodeTransaction(length, userId){
+    try{
+        // lấy setting về transaction và transaction_detail
+        let setting = await transactionRepo.settingTransaction(userId);
 
-    // fallback nếu không có setting
-    if (!setting || setting.length == 0) {
-        setting = {
-            transaction: "T"+ (new Date()).toLocaleDateString('en-US', {month: 'short'}) + (new Date()).getFullYear(),
-            transaction_number: 1,
-            transaction_detail: "T"+ (new Date()).toLocaleDateString('en-US', {month: 'short'}) + (new Date()).getFullYear() + "D",
-            transaction_detail_number: 1
+        // fallback nếu không có setting
+        if (!setting || !setting.transaction_prefix || !setting.transaction_detail_prefix) {
+            setting = {
+                transaction_prefix: setting.transaction_prefix==null?"T"+ (new Date()).toLocaleDateString('en-US', {month: 'short'}) + (new Date()).getFullYear():setting.transaction_prefix,
+                transaction_number: setting.transaction_number,
+                transaction_detail_prefix: setting.transaction_detail_prefix==null?"T"+ (new Date()).toLocaleDateString('en-US', {month: 'short'}) + (new Date()).getFullYear() + "D":setting.transaction_detail_prefix,
+                transaction_detail_number: setting.transaction_detail_number
+            };
+        }
+
+        // code cho transaction chính
+        const transactionCode = setting.transaction_prefix + setting.transaction_number;
+
+        // generate danh sách detail code
+        const transactionDetailCode = Array.from({ length }, (_, i) => {
+            return (
+            setting.transaction_detail_prefix +
+            (setting.transaction_detail_number + i)
+            );
+        });
+
+        return {
+            "transaction_number": setting.transaction_number,
+            "transaction_detail_number": setting.transaction_detail_number,
+            "transactionCode": transactionCode,
+            "transactionDetailCode": transactionDetailCode
         };
     }
+    catch(error){
+        console.error("error: ", error);
+    }
+}
 
-    // code cho transaction chính
-    const transactionCode = setting.transaction + setting.transaction_number;
+// tính tổng amount
+function sumAmounts(amountStr) {
+    if (!amountStr) return 0;
 
-    // generate danh sách detail code
-    const transactionDetailCode = Array.from({ length }, (_, i) => {
-        return (
-        setting.transaction_detail +
-        (setting.transaction_detail_number + i)
-        );
-    });
+    return amountStr
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .reduce((sum, val) => {
+        const num = Number(val.replace(/,/g, ''));
+        if (isNaN(num)) return sum; // bỏ qua giá trị lỗi
+        return sum + num;
+        }, 0);
+}
 
-    return {
-        transactionCode,
-        transactionDetailCode
-    };
+async function addNewTransactionDetail(transactionDetailData, transactionNumber, transactionDetailNumber, idTransaction, transactionDetailCodeList, userId){
+    try{
+        let amountArray = transactionDetailData.amount.split(",");
+        let transactionArray = transactionDetailData.name.split(",");
+        let categoryArray = transactionDetailData.categoryId.split(",");
+
+        if(transactionArray.length == amountArray.length){
+            for(let i=0; i<=transactionArray.length-1; i++){
+                let subTransaction = {
+                    "code": transactionDetailCodeList[i],
+                    "name": transactionArray[i],
+                    "amount": amountArray[i],
+                    "categoryId": parseInt(categoryArray[i])
+                };
+
+                await transactionDetailRepo.addNew(subTransaction, parseInt(idTransaction.id_transaction));
+            }
+        }
+        else if(amountArray.length == 1){
+            for(let i=0; i<=transactionArray.length-1; i++){
+                let subTransaction = {
+                    "code": transactionDetailCodeList[i],
+                    "name": transactionArray[i],
+                    "amount": amountArray[0]/(transactionArray.length==0?1:transactionArray.length),
+                    "categoryId": parseInt(categoryArray[i])
+                };
+
+                await transactionDetailRepo.addNew(subTransaction, parseInt(idTransaction.id_transaction));
+            }
+        }
+
+        await transactionRepo.updateNumberTrans(transactionNumber+1, transactionDetailNumber+transactionArray.length, userId);
+    }
+    catch(error){
+        console.log(error);
+    }
 }
 
 // chuyển đổi dữ liệu đầu vào thành định dạng phù hợp với DTO
@@ -133,19 +201,30 @@ function convertInputContent(data){
 }
 
 // cập nhật bản ghi chi tiêu
-async function UpdateSpending(req){
+async function UpdateTransaction(transactionRequest, userId){
     try{
-        let requestData = req.body;
+        // kiểm tra việc chỉnh sửa dẫn đến thay đổi giao dịch con thành con của 1 giao dịch khác
+        if(transactionRequest.date || transactionRequest.time || transactionRequest.placename){
 
-        // format lại theo dto
-        let spendingRecord = new SpendingUpdateRecord(
-            requestData
-        );
+        }
+        else{
+            if(!transactionRequest.transactionDetailCode && !transactionRequest.transactionCode){
+                return;
+            }
+            else if(!transactionRequest.transactionDetailCode){
+                return;
+            }
 
-        console.log("Spending Record: ", spendingRecord);
+            let transactionDetail = {};
 
-        // cập nhật vào db
-        return await transactionRepo.update(spendingRecord, 1);
+            // transactionDetail.name = transactionRequest.name??(không thêm nữa)
+
+            // update db transaction detail
+            await transactionDetailRepo.update()
+
+            // update db transaction
+            await transactionRepo.updateInDay(transactionRequest, userId)
+        }
     }
     catch(error){
         console.log("Error: ", error);
