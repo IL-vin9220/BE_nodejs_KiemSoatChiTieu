@@ -169,6 +169,33 @@ class transactionRepository {
 		return result.rows[0]
 	}
 
+	// tìm kiếm giao dịch theo date và time
+	async filterTransactionByDateAndTime(startDate, endDate, time, userId){
+		let query = `
+			select * from transactions t
+			where t.transaction_date >= $1 and t.transaction_date <= $2 and t.transaction_time = $3 and t.user_id = $4
+		`;
+
+		let values = [startDate, endDate, time, userId];
+
+		let result = await pool.query(query, values);
+		return result.rows;
+	}
+
+	async updateTotalAmountOfTransactionByTransactionDetailCode(totalAmount, idTransaction){
+		let query = `
+			update transaction set
+			transaction_total_amount = $1
+			where id_transaction = $2
+			return *;
+		`;
+
+		let values = [totalAmount, idTransaction];
+
+		let result = await pool.query(query, values);
+		return result.rows[0];
+	}
+
 	async updateInDay(transactionUpdate, userId){
 		let query = `
 			update transactions set
@@ -180,6 +207,24 @@ class transactionRepository {
 
 		let result = await pool.query(query, values);
 		return result.rows[0];
+	}
+
+	async getDateExist(transaction, userId){
+		let query = `
+			select transaction_detail_code from transaction_detail td join transactions t on td.id_transaction = t.id_transaction
+			where
+			(
+				(t.transaction_date = $1 and t.transaction_time = $2) 
+				or 
+				(t.transaction_date = $3 and t.transaction_time = $4 and t.place_name = $5)
+			)
+			and t.user_id = $6
+		`;
+
+		let values = [transaction.date, transaction.time, transaction.date, transaction.time, transaction.placeName, userId];
+
+		let result = await pool.query(query, values);
+		return result.rows;
 	}
 
 	// gán thẻ chi tiêu bị xóa

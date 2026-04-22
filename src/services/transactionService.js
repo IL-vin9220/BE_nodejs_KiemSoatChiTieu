@@ -203,9 +203,44 @@ function convertInputContent(data){
 // cập nhật bản ghi chi tiêu
 async function UpdateTransaction(transactionRequest, userId){
     try{
+        console.log("transaction request: ", transactionRequest);
         // kiểm tra việc chỉnh sửa dẫn đến thay đổi giao dịch con thành con của 1 giao dịch khác
         if(transactionRequest.date || transactionRequest.time || transactionRequest.placename){
+            // kiểm tra thông tin đã có chưa
+            let AllTransactionDetailCodeByDate = await getDateExist(transactionRequest, userId);
+            
+            // nếu đã có thì kiểm tra giao dịch con có nằm trong hay không
+            if(AllTransactionDetailCodeByDate.length == 0){
+                let getCode = await getCodeTransaction(1, userId);
 
+                let newTransaction = {
+                    "code": getCode.transactionCode,
+                    "amount": transactionRequest.amount,
+                    "time": transactionRequest.time,
+                    "date": transactionRequest.date,
+                    "placeName": transactionRequest.placeName,
+                    "placeLocation": transactionRequest.placeLocation,
+                    "placeAddress": transactionRequest.placeAddress,
+                    "note": transactionRequest.note,
+                };
+
+                // insert transaction + update transaction_id của transaction_detail
+                let idTransaction = await transactionRepo.addNew(newTransaction, userId);
+                await transactionDetailRepo.updateIdTransOfTransactionDetail(idTransaction, transactionRequest.transactionDetailCode);
+            }
+            else{
+                // lấy ra thông tin giao dịch từ date, time
+                let transactionRecord = await transactionRepo.filterTransactionByDateAndTime((new Date(transactionRequest.date)), (new Date(transactionRequest.date)), transactionRequest.time, userId);
+
+                // let totalAmountCurrent = await transactionRepo.getTotalAmount(transactionRecord.id_transaction, userId);
+
+                let totalAmountCurrent = transactionRecord.transaction_total_amount + parseFloat(transactionRequest.trending??0);
+
+                // update amount của transaction và update transaction_id của transaction_detail
+                await transactionRepo.updateTotalAmountOfTransactionByTransactionDetailCode(totalAmountCurrent, transactionRecord.id_transaction);
+
+                await transactionDetailRepo.updateIdTransOfTransactionDetail(transactionRecord.id_transaction, transactionRequest.transactionDetailCode);
+            }
         }
         else{
             if(!transactionRequest.transactionDetailCode && !transactionRequest.transactionCode){
@@ -218,12 +253,19 @@ async function UpdateTransaction(transactionRequest, userId){
             let transactionDetail = {};
 
             // transactionDetail.name = transactionRequest.name??(không thêm nữa)
+            Object.entries(transactionRequest).forEach(([key, value]) => {
+                if(value != null){
+                    transactionDetail.key = value;
+                }
+            });
+
+            console.log(transactionDetail);
 
             // update db transaction detail
-            await transactionDetailRepo.update()
+            // await transactionDetailRepo.update()
 
             // update db transaction
-            await transactionRepo.updateInDay(transactionRequest, userId)
+            // await transactionRepo.updateInDay(transactionRequest, userId)
         }
     }
     catch(error){
@@ -455,7 +497,7 @@ async function filterRecord(dataRequest, userId){
 export default { 
     getTransactionByPage,
     AddNewTransaction,
-    UpdateSpending,
+    UpdateTransaction,
     softDeleteSpending,
     // DeleteSpending,
     searchRecord,

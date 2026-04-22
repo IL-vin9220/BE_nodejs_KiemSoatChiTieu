@@ -43,6 +43,19 @@ class transactionDetailRepository {
         let result = pool.query(query, values);
         return result.rows
     }
+
+    async updateIdTransOfTransactionDetail(idTransaction, transactionDetailCode){
+        let query = `
+            update transaction_detail td set
+            id_transaction = $1
+            where td.transaction_detail_code = $2 return *;
+        `;
+        
+        let values = [idTransaction, transactionDetailCode];
+
+        let result = pool.query(query, values);
+        return result.rows[0];
+    }
 }
 
 export default new transactionDetailRepository();
