@@ -207,7 +207,7 @@ async function UpdateTransaction(transactionRequest, userId){
         // kiểm tra việc chỉnh sửa dẫn đến thay đổi giao dịch con thành con của 1 giao dịch khác
         if(transactionRequest.date || transactionRequest.time || transactionRequest.placename){
             // kiểm tra thông tin đã có chưa
-            let AllTransactionDetailCodeByDate = await getDateExist(transactionRequest, userId);
+            let AllTransactionDetailCodeByDate = await transactionRepo.getDateExist(transactionRequest, userId);
             
             // nếu đã có thì kiểm tra giao dịch con có nằm trong hay không
             if(AllTransactionDetailCodeByDate.length == 0){
