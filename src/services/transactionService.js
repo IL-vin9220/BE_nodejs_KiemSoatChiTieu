@@ -252,14 +252,14 @@ async function UpdateTransaction(transactionRequest, userId){
 
             let transactionDetail = {};
 
-            // transactionDetail.name = transactionRequest.name??(không thêm nữa)
+            
             Object.entries(transactionRequest).forEach(([key, value]) => {
                 if(value != null){
-                    transactionDetail.key = value;
+                    transactionDetail[key] = value;
                 }
             });
 
-            console.log(transactionDetail);
+            console.log("transaction detail: ", transactionDetail);
 
             // update db transaction detail
             // await transactionDetailRepo.update()
