@@ -204,68 +204,51 @@ function convertInputContent(data){
 async function UpdateTransaction(transactionRequest, userId){
     try{
         console.log("transaction request: ", transactionRequest);
-        // kiểm tra việc chỉnh sửa dẫn đến thay đổi giao dịch con thành con của 1 giao dịch khác
-        if(transactionRequest.date || transactionRequest.time || transactionRequest.placename){
-            // kiểm tra thông tin đã có chưa
-            let AllTransactionDetailCodeByDate = await transactionRepo.getDateExist(transactionRequest, userId);
-            
-            // nếu đã có thì kiểm tra giao dịch con có nằm trong hay không
-            if(AllTransactionDetailCodeByDate.length == 0){
-                let getCode = await getCodeTransaction(1, userId);
 
-                let newTransaction = {
-                    "code": getCode.transactionCode,
-                    "amount": transactionRequest.amount,
-                    "time": transactionRequest.time,
-                    "date": transactionRequest.date,
-                    "placeName": transactionRequest.placeName,
-                    "placeLocation": transactionRequest.placeLocation,
-                    "placeAddress": transactionRequest.placeAddress,
-                    "note": transactionRequest.note,
-                };
+        // kiểm tra thông tin đã có chưa
+        let AllTransactionDetailCodeByDate = await transactionRepo.getDateExist(transactionRequest, userId);
 
-                // insert transaction + update transaction_id của transaction_detail
-                let idTransaction = await transactionRepo.addNew(newTransaction, userId);
-                await transactionDetailRepo.updateIdTransOfTransactionDetail(idTransaction, transactionRequest.transactionDetailCode);
-            }
-            else{
-                // lấy ra thông tin giao dịch từ date, time
-                let transactionRecord = await transactionRepo.filterTransactionByDateAndTime((new Date(transactionRequest.date)), (new Date(transactionRequest.date)), transactionRequest.time, userId);
+        let transactionDetail = {
+            "code": transactionRequest.transactionDetailCode,
+            "name": transactionRequest.name,
+            "amount": transactionRequest.amount,
+            "categoryId": transactionRequest.categoryId,
+            "transactionDetailNote": transactionRequest.note??null,
+            "transactionImage": transactionRequest.image??null
+        };
 
-                // let totalAmountCurrent = await transactionRepo.getTotalAmount(transactionRecord.id_transaction, userId);
+        if(AllTransactionDetailCodeByDate.length==0){
+            // mảng rỗng => chưa có => thêm mới
+            let getCode = await getCodeTransaction(1, userId);
 
-                let totalAmountCurrent = transactionRecord.transaction_total_amount + parseFloat(transactionRequest.trending??0);
+            let newTransaction = {
+                "code": getCode.transactionCode,
+                "amount": transactionRequest.amount,
+                "time": transactionRequest.time,
+                "date": transactionRequest.date,
+                "placeName": transactionRequest.placeName,
+                "placeLocation": transactionRequest.placeLocation,
+                "placeAddress": transactionRequest.placeAddress,
+                "note": transactionRequest.note,
+            };
+            console.log("new trans: ", newTransaction)
 
-                // update amount của transaction và update transaction_id của transaction_detail
-                await transactionRepo.updateTotalAmountOfTransactionByTransactionDetailCode(totalAmountCurrent, transactionRecord.id_transaction);
-
-                await transactionDetailRepo.updateIdTransOfTransactionDetail(transactionRecord.id_transaction, transactionRequest.transactionDetailCode);
-            }
+            // insert transaction + update transaction_id của transaction_detail
+            let idTransaction = await transactionRepo.addNew(newTransaction, userId);
+            console.log("id: ", idTransaction);
+            await transactionDetailRepo.updateIdTransOfTransactionDetail(parseInt(idTransaction.id_transaction), transactionDetail);
         }
         else{
-            if(!transactionRequest.transactionDetailCode && !transactionRequest.transactionCode){
-                return;
-            }
-            else if(!transactionRequest.transactionDetailCode){
-                return;
-            }
-
-            let transactionDetail = {};
-
+            // mã có => cập nhật cùng cha và khác cha
+            // lấy ra thông tin giao dịch từ date, time
+            let transactionRecord = await transactionRepo.filterTransactionByDateAndTime((new Date(transactionRequest.date)), (new Date(transactionRequest.date)), transactionRequest.time, userId);
             
-            Object.entries(transactionRequest).forEach(([key, value]) => {
-                if(value != null){
-                    transactionDetail[key] = value;
-                }
-            });
+            let totalAmountCurrent = parseFloat(transactionRecord.transaction_total_amount) + parseFloat(transactionRequest.trending??0);
+            
+            // update amount của transaction và update transaction_id của transaction_detail
+            let updateTrans = await transactionRepo.updateTotalAmountOfTransactionByTransactionDetailCode(totalAmountCurrent, transactionRecord.id_transaction);
 
-            console.log("transaction detail: ", transactionDetail);
-
-            // update db transaction detail
-            // await transactionDetailRepo.update()
-
-            // update db transaction
-            // await transactionRepo.updateInDay(transactionRequest, userId)
+            let returnUpdate = await transactionDetailRepo.updateIdTransOfTransactionDetail(transactionRecord.id_transaction, transactionDetail);
         }
     }
     catch(error){
@@ -275,33 +258,71 @@ async function UpdateTransaction(transactionRequest, userId){
 }
 
 // xóa bản ghi chi tiêu
-async function softDeleteSpending(req){
+async function softDeleteSpending(transactionDelete, userId){
     try{
-        let requestData = req.body;
+        let idTransaction = null;
 
-        return await transactionRepo.softDelete(requestData.id); // xóa mềm trong db
+        const hasTransactionCode =
+            transactionDelete.transactionCode && transactionDelete.transactionCode.trim() !== "";
+
+        const hasTransactionDetailCode =
+            transactionDelete.transactionDetailCode && transactionDelete.transactionDetailCode.trim() !== "";
+
+        if (!hasTransactionCode && !hasTransactionDetailCode) {
+            throw new AppError("Không có giá trị để xóa", statusCodes.BAD_REQUEST);
+        }
+
+        if (hasTransactionCode) {
+            idTransaction = await transactionRepo.getITransactionFromTransactionCode(transactionDelete.transactionCode, userId);
+        }
+        else if (hasTransactionDetailCode) {
+            idTransaction = await transactionDetailRepo.getIdTransactionFromTransactionDetailCode(transactionDelete.transactionDetailCode, userId);
+        }
+
+        console.log("id: ", idTransaction);
+
+        // lấy ra ds con cần xóa
+        let transactionDetailListActive = await transactionRepo.getAllRecordChildActiveByTransactionId(idTransaction, userId);
+
+        if(transactionDetailListActive.length > 0){
+            if(!transactionDelete.transactionCode){
+                await transactionDetailRepo.softDeleteAllTransactionDetail(idTransaction);
+            }
+            else if(!transactionDelete.transactionDetailCode){
+                await transactionDetailRepo.softDeleteTransactionDetailByCode(transactionDelete.transactionDetailCode, userId);
+            }
+            return;
+        }
+        else throw new AppError("Vượt quá số lượng bản ghi để xóa", statusCodes.BAD_LOGIC);
     }
     catch(error){
+        if(error instanceof AppError) throw error;
+
         throw new AppError("Lỗi xóa bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
 // tìm kiếm bản ghi theo code hoặc tên sản phẩm
-async function searchRecord(req){
+async function searchRecord(itemSearch, userId){
     try{
-        // let requestData = req.body;
+        itemSearch = itemSearch?.trim();
 
-        // let getAll = await _getAll(spendingURL);
+        if(!itemSearch){
+            throw new AppError("Từ khóa tìm kiếm không hợp lệ", statusCodes.BAD_REQUEST);
+        }
 
-        // if(requestData.type === "code"){
-        //     return getAll.filter(item => item.product.code === requestData.code);
-        // }
-        // else{
-        //     // type : name
-        //     return getAll.filter(item => item.product.name === requestData.name);
-        // }
+        // chỉ tìm kiếm theo tên giao dịch
+        let listSearch = transactionDetailRepo.searchTransactionList(itemSearch, userId);
+
+        if(listSearch==0){
+            return "Không có bản ghi nào được tìm thấy";
+        }
+
+        return listSearch;
     }
     catch(error){
+        if(error instanceof AppError) throw error;
+
         throw new AppError("Lỗi tìm kiếm bản ghi", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }

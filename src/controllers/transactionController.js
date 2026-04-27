@@ -54,7 +54,10 @@ export const updateRecord = async (req, res) => {
 
 export const softDeleteSpending = async (req, res) => {
     try{
-        await transactionServices.softDeleteSpending(req);
+        // let userId = req.user.userId;
+        let userId = 1;
+        let transactionRequest = req.body;
+        await transactionServices.softDeleteSpending(transactionRequest, userId);
         res.status(statusCodes.OK).json({message: "Xóa bản ghi thành công"});
     }
     catch(error){
@@ -65,8 +68,11 @@ export const softDeleteSpending = async (req, res) => {
 
 export const searchItemInfor = async (req, res) => {
     try{
-        let searchRes = await transactionServices.searchRecord(req);
-        res.status(statusCodes.OK).json({message: "Đã Tìm Thấy Bản Ghi", data: searchRes});
+        // let userId = req.user.userId;
+        let userId = 1;
+        let transactionRequest = req.body;
+        let searchResList = await transactionServices.searchRecord(transactionRequest, userId);
+        res.status(statusCodes.OK).json({message: "Đã Tìm Thấy Bản Ghi", data: searchResList});
     }
     catch(error){
         const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;

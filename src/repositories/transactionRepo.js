@@ -172,22 +172,26 @@ class transactionRepository {
 	// tìm kiếm giao dịch theo date và time
 	async filterTransactionByDateAndTime(startDate, endDate, time, userId){
 		let query = `
-			select * from transactions t
-			where t.transaction_date >= $1 and t.transaction_date <= $2 and t.transaction_time = $3 and t.user_id = $4
+			select * from transactions t inner join transaction_detail td on t.id_transaction = td.id_transaction
+			where t.transaction_date >= $1 
+			and t.transaction_date <= ($2::date + INTERVAL '1 day') 
+			and t.transaction_time = $3 
+			and t.user_id = $4
+			and td.deleted_at is null
 		`;
 
 		let values = [startDate, endDate, time, userId];
 
 		let result = await pool.query(query, values);
-		return result.rows;
+		return result.rows[0];
 	}
 
 	async updateTotalAmountOfTransactionByTransactionDetailCode(totalAmount, idTransaction){
 		let query = `
-			update transaction set
+			update transactions set
 			transaction_total_amount = $1
 			where id_transaction = $2
-			return *;
+			returning *;
 		`;
 
 		let values = [totalAmount, idTransaction];
@@ -211,31 +215,56 @@ class transactionRepository {
 
 	async getDateExist(transaction, userId){
 		let query = `
-			select transaction_detail_code from transaction_detail td join transactions t on td.id_transaction = t.id_transaction
-			where
-			(
-				(t.transaction_date = $1 and t.transaction_time = $2) 
-				or 
-				(t.transaction_date = $3 and t.transaction_time = $4 and t.place_name = $5)
-			)
-			and t.user_id = $6
+			select td.transaction_detail_code as transactionDetailCode, td.id_transaction as transactionId from transaction_detail td join transactions t on td.id_transaction = t.id_transaction
+			where t.transaction_date = $1 
+			and t.transaction_time = $2
+			and t.place_name = $3 
+			and t.user_id = $4
 		`;
 
-		let values = [transaction.date, transaction.time, transaction.date, transaction.time, transaction.placeName, userId];
+		let values = [transaction.date, transaction.time, transaction.placeName, userId];
 
 		let result = await pool.query(query, values);
 		return result.rows;
 	}
 
-	// gán thẻ chi tiêu bị xóa
-	async softDelete(id) {
+	// soft delete giao dịch
+	async softDelete(idTransaction) {
 		const query = `
-		UPDATE spending SET deleted_at = CURRENT_TIMESTAMP
-		WHERE id = $1 RETURNING *;`;
+		UPDATE transactions SET deleted_at = CURRENT_TIMESTAMP
+		WHERE id_transaction = $1 RETURNING *;`;
 
-		const result = await pool.query(query, [id]);
-			return result.rows[0];
+		let values = [idTransaction];
+
+		let result = await pool.query(query, values);
+		return result.rows[0];
 	}
+
+	// lấy ra idTransaction từ transactionCode của 1 giao dịch
+	async getITransactionFromTransactionCode(transactionCode, userId){
+		let query = `
+			select id_transaction from transactions where transaction_code = $1 and user_id = $2
+		`;
+
+		let values = [transactionCode, userId];
+
+		let result = await pool.query(query, values);
+		return result.rows;
+	}
+
+	// lấy ra danh sách giao dịch con chưa bị xóa của 1 giao dịch
+	async getAllRecordChildActiveByTransactionId(transactionId, userId){
+		let query = `
+			select td.transaction_detail_code from transaction_detail td join transactions t on td.id_transaction = t.id_transaction
+			where td.id_transaction = $1 adnd t.user_id = $2
+		`;
+
+		let values = [transactionId, userId];
+
+		let result = await pool.query(query, values);
+		return result.rows;
+	}
+
 
 	// lấy ra toàn danh sách bản ghi chi tiêu theo số lượng của trang
 	async getDataByPage(userId, page, pageSize) {

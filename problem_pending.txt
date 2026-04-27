@@ -1,0 +1,16 @@
+1. transaction
+    - update cần lựa chọn transaction trong trường hợp cặp date-time-place có quá nhiều record khi mà update 1 transaction detail
+
+2. category
+
+3. budget
+
+4. wallet
+
+5. fund
+
+6. report
+
+7. information user
+
+8. setting

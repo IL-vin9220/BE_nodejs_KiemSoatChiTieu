@@ -13,6 +13,6 @@ class SpendingDTO {
         this.id = spending.id;
 
     }
-  }
+}
   
 export default SpendingDTO;
