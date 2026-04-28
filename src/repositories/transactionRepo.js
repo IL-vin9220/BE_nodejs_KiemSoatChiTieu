@@ -243,25 +243,28 @@ class transactionRepository {
 	// lấy ra idTransaction từ transactionCode của 1 giao dịch
 	async getITransactionFromTransactionCode(transactionCode, userId){
 		let query = `
-			select id_transaction from transactions where transaction_code = $1 and user_id = $2
+			select t.id_transaction from transactions t 
+			where t.transaction_code = $1 
+			and t.user_id = $2
 		`;
 
 		let values = [transactionCode, userId];
 
 		let result = await pool.query(query, values);
-		return result.rows;
+		return result.rows[0];
 	}
 
 	// lấy ra danh sách giao dịch con chưa bị xóa của 1 giao dịch
-	async getAllRecordChildActiveByTransactionId(transactionId, userId){
+	async getAllRecordChildActiveByTransactionId(transaction, userId){
 		let query = `
-			select td.transaction_detail_code from transaction_detail td join transactions t on td.id_transaction = t.id_transaction
-			where td.id_transaction = $1 adnd t.user_id = $2
+			select td.transaction_detail_code from transaction_detail td inner join transactions t on td.id_transaction = t.id_transaction
+			where td.id_transaction = $1 and t.user_id = $2
 		`;
 
-		let values = [transactionId, userId];
+		let values = [transaction.id_transaction, userId];
 
 		let result = await pool.query(query, values);
+
 		return result.rows;
 	}
 

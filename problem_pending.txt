@@ -1,5 +1,6 @@
 1. transaction
     - update cần lựa chọn transaction trong trường hợp cặp date-time-place có quá nhiều record khi mà update 1 transaction detail
+    - soft delete cần xử lý khi có nhiều record cần xóa
 
 2. category
 

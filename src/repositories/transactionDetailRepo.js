@@ -92,7 +92,7 @@ class transactionDetailRepository {
         let query = `
             update transaction_detail set
                 deleted_at = current_timestamp
-            where id_transaction = $1
+            where id_transaction = any($1)
             returning *;
         `;
 

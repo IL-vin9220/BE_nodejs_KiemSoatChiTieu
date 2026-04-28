@@ -260,7 +260,7 @@ async function UpdateTransaction(transactionRequest, userId){
 // xóa bản ghi chi tiêu
 async function softDeleteSpending(transactionDelete, userId){
     try{
-        let idTransaction = null;
+        let transaction = null;
 
         const hasTransactionCode =
             transactionDelete.transactionCode && transactionDelete.transactionCode.trim() !== "";
@@ -273,22 +273,24 @@ async function softDeleteSpending(transactionDelete, userId){
         }
 
         if (hasTransactionCode) {
-            idTransaction = await transactionRepo.getITransactionFromTransactionCode(transactionDelete.transactionCode, userId);
+            transaction = await transactionRepo.getITransactionFromTransactionCode(transactionDelete.transactionCode, userId);
         }
         else if (hasTransactionDetailCode) {
-            idTransaction = await transactionDetailRepo.getIdTransactionFromTransactionDetailCode(transactionDelete.transactionDetailCode, userId);
+            transaction = await transactionDetailRepo.getIdTransactionFromTransactionDetailCode(transactionDelete.transactionDetailCode, userId);
         }
 
-        console.log("id: ", idTransaction);
+        console.log("id: ", transaction);
 
         // lấy ra ds con cần xóa
-        let transactionDetailListActive = await transactionRepo.getAllRecordChildActiveByTransactionId(idTransaction, userId);
+        let transactionDetailListActive = await transactionRepo.getAllRecordChildActiveByTransactionId(transaction, userId);
+        console.log("transaction detail list: ", transactionDetailListActive);
+        console.log("length: ", transactionDetailListActive.length);
 
         if(transactionDetailListActive.length > 0){
-            if(!transactionDelete.transactionCode){
+            if(hasTransactionCode){
                 await transactionDetailRepo.softDeleteAllTransactionDetail(idTransaction);
             }
-            else if(!transactionDelete.transactionDetailCode){
+            else if(hasTransactionDetailCode){
                 await transactionDetailRepo.softDeleteTransactionDetailByCode(transactionDelete.transactionDetailCode, userId);
             }
             return;
