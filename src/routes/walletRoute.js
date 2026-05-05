@@ -2,11 +2,18 @@ import { Router } from "express";
 let walletRoute = Router();
 import { 
     getAllWallet,
-    getAllAmountWalletActiveByUserId } from "../controllers/walletController.js";
+    getAllAmountWalletActiveByUserId,
+    createNewWallet,
+    updateWallet,
+    softDeletedWallet,
+} from "../controllers/walletController.js";
 import authMiddleware from "../middleware/middleware.js"
 
-walletRoute.put("/wallet", authMiddleware, getAllWallet);
+walletRoute.get("/get-all", authMiddleware, getAllWallet);
 walletRoute.get("/amountWalletActive", authMiddleware, getAllAmountWalletActiveByUserId);
-// walletRoute.post("/login", login);
+walletRoute.put("/create", authMiddleware, createNewWallet);
+walletRoute.put('/update', authMiddleware, updateWallet);
+walletRoute.put('/delete', authMiddleware, softDeletedWallet);
+// walletRoute.post("/login", authMiddleware, login);
 
 export default walletRoute;

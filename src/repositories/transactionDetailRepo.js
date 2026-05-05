@@ -88,15 +88,15 @@ class transactionDetailRepository {
     }
 
     // xóa toàn bộ giao dịch con của transaction
-    async softDeleteAllTransactionDetail(idTransaction){
+    async softDeleteAllTransactionDetail(idTransactionList){
         let query = `
             update transaction_detail set
                 deleted_at = current_timestamp
-            where id_transaction = any($1)
+            where transaction_detail_code = any($1)
             returning *;
         `;
 
-        let values = [idTransaction];
+        let values = [idTransactionList];
 
         let result = await pool.query(query, values);
         return result.rows[0] || null;

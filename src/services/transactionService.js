@@ -288,7 +288,9 @@ async function softDeleteSpending(transactionDelete, userId){
 
         if(transactionDetailListActive.length > 0){
             if(hasTransactionCode){
-                await transactionDetailRepo.softDeleteAllTransactionDetail(idTransaction);
+                let idList = transactionDetailListActive.map(idItem => {return idItem.transaction_detail_code});
+                
+                await transactionDetailRepo.softDeleteAllTransactionDetail(idList);
             }
             else if(hasTransactionDetailCode){
                 await transactionDetailRepo.softDeleteTransactionDetailByCode(transactionDelete.transactionDetailCode, userId);

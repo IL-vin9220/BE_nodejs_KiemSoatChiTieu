@@ -8,9 +8,9 @@ import {
 } from "../controllers/userController.js";
 import authMiddleware from "../middleware/middleware.js"
 
-userRoute.put("/edit", editCurrentUser);
-userRoute.get("/get-user", getUserInfor);
-userRoute.post("/login", login);
-userRoute.post("/add-new", createNewUserController);
+userRoute.put("/edit", authMiddleware, editCurrentUser);
+userRoute.get("/get-user", authMiddleware, getUserInfor);
+userRoute.post("/login", authMiddleware, login);
+userRoute.post("/add-new", authMiddleware, createNewUserController);
 
 export default userRoute;

@@ -1,9 +1,18 @@
 import { Router } from "express";
 let categoryRoute = Router();
-import { autoCategory, createCategory } from "../controllers/categoryController.js";
+import {
+    createCategory,
+    updateCategory,
+    searchCategory,
+    softDeleteCategory,
+    getAll
+} from "../controllers/categoryController.js";
+import authMiddleware from "../middleware/middleware.js"
 
-categoryRoute.get("/complete-category", autoCategory);
-categoryRoute.put("/add-new", createCategory);
-
+categoryRoute.put("/add-new", authMiddleware, createCategory);
+categoryRoute.put("/update", authMiddleware, updateCategory);
+categoryRoute.post("/search", authMiddleware, searchCategory);
+categoryRoute.put("/delete", authMiddleware, softDeleteCategory);
+categoryRoute.get("/getAll", authMiddleware, getAll);
 
 export default categoryRoute;

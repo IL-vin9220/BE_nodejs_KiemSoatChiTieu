@@ -3,63 +3,17 @@ import walletDTO from '../dto/request/walletDTO.js';
 
 class walletRepository{
 
-    async getWallet(userID){
+    async getWallet(userId){
         let query = `
-            select * from wallet where user_id = $1
-            return *;
-        `;
-
-        let result = await pool.query(query, userID);
-        return result.rows[0];
-    }
-
-    async addWallet(wallet){
-        let query = `
-            insert into wallet(wallet_name, icon, amount, user_id) values($1, $2, $3, $4)
-            return *;
+            select * from wallet where user_id = $1 and deleted_at is null
         `;
 
         let values = [
-            wallet.name,
-            wallet.icon,
-            wallet.amount,
-            wallet.userID
+            userId
         ];
 
         let result = await pool.query(query, values);
-        return result.rows[0];
-    }
-
-
-    async updateWallet(wallet, userID){
-        let query = `
-            update wallet set
-                wallet_name = $1,
-                icon = $2,
-                amount = $3
-            where user_id = $4
-            return *;
-        `;
-
-        let values = [
-            wallet.name,
-            wallet.icon,
-            wallet.amount,
-            userID
-        ];
-
-        let result = await pool.query(query, values);
-        return result.rows[0];
-    }
-
-    async deleteWallet(walletID){
-        let query = `
-            delete from wallet where wallet_id = $1
-            return *;
-        `;
-
-        let result = await pool.query(query, walletID);
-        return result.rows[0];
+        return result.rows;
     }
 
 
@@ -147,7 +101,68 @@ class walletRepository{
         return result.rows;
     }
 
+    async createNew(wallet, userId){
+        let query = `
+            insert into wallet(wallet_name, icon, amount, type, color, user_id) values($1, $2, $3, $4, $5, $6) returning *;
+        `;
 
+        let values = [
+            wallet.walletName,
+            wallet.walletIcon,
+            wallet.walletAmount,
+            wallet.type,
+            wallet.color,
+            userId
+        ];
+
+        let result = await pool.query(query, values);
+        return result.rows[0];
+    }
+
+    async updateWallet(wallet, userId){
+        let query = `
+            update wallet set
+                wallet_name = $1,
+                icon = $2,
+                amount = $3,
+                status_active = $4,
+                updated_at = current_timestamp,
+                type = $5,
+                color = $6
+            where user_id = $7 and id = $8 and deleted_at is null
+            returning *;
+        `;
+
+        let values = [
+            wallet.walletName,
+            wallet.walletIcon,
+            wallet.walletAmount,
+            wallet.statusActive,
+            wallet.type,
+            wallet.color,
+            userId,
+            wallet.id
+        ];
+
+        let result = await pool.query(query, values);
+        return result.rows[0] || null;
+    }
+
+    async softDeleteWallet(walletId, userId){
+        let query = `
+            update wallet set
+                deleted_at = current_timestamp
+            where user_id = $1 and id = $2 and deleted_at is null
+        `;
+
+        let values = [
+            userId,
+            walletId
+        ];
+
+        let result = await pool.query(query, values);
+        return result.rows[0];
+    }
 }
 
 export default new walletRepository();
