@@ -10,7 +10,7 @@ import authMiddleware from "../middleware/middleware.js"
 
 userRoute.put("/edit", authMiddleware, editCurrentUser);
 userRoute.get("/get-user", authMiddleware, getUserInfor);
-userRoute.post("/login", authMiddleware, login);
+userRoute.post("/login", login);
 userRoute.post("/add-new", authMiddleware, createNewUserController);
 
 export default userRoute;

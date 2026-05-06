@@ -64,15 +64,16 @@ class UserRepository{
         return result.rows[0];
     }
 
-    async getUserInfor(id){
+    async getUserInfor(user){
         // console.log("user raw: ", user);
 
         let query = `
-            select * from users where users.id = $1
+            select * from users where users.username = $1 and users.password = $2
         `;
 
         let values = [
-            id
+            user.username,
+            user.password
         ];
 
         let result = await pool.query(query, values);

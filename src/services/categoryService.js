@@ -82,7 +82,15 @@ async function getAllCategory(userId){
     }
 }
 
-async function filterCategory(requestData, userId){}
+async function getTotalAmountByCategoryTypeExpense(userId){
+    try{
+        let totalAmount = await categoryRepo.listCategoryExpense(userId);
+        return totalAmount
+    }
+    catch(error){
+        throw new AppError("Lỗi lấy danh sách bản ghi danh mục", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
 
 export default {
     getAllCategory,
@@ -90,6 +98,6 @@ export default {
     updateCategory,
     softDeleteCategory,
     searchCategory,
-    filterCategory,
+    getTotalAmountByCategoryTypeExpense,
 };
 

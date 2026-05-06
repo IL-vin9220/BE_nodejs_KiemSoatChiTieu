@@ -107,6 +107,23 @@ class categoryRepository{
             console.error(error);
         }
     }
+
+    async listCategoryExpense(userId){
+        let query = `
+            select sum(transaction_amount) as "totalAmount"
+            from transaction_detail td
+            inner join category c on td.category_id = c.id
+            inner join transactions t on td.transaction_id = t.transaction_id
+            where t.user_id = $1 and c.type = 0
+        `;
+
+        let values = [
+            userId
+        ];
+
+        let result = await pool.query(query, values);
+        return result.rows[0];
+    }
 }
 
 export default new categoryRepository();
