@@ -11,7 +11,9 @@ import {
     filterCost, 
     checkPlaceBought, 
     checkPlaceByTomTom, 
-    getAllDataListFile 
+    getAllDataListFile,
+    listTop10TransactionLast,
+    suggestedCategory,
 } from '../controllers/transactionController.js';
 import authMiddleware from "../middleware/middleware.js"
 
@@ -25,6 +27,8 @@ transactionRoute.get("/filter-time", authMiddleware, filterTime);
 transactionRoute.get("/filter-cost", authMiddleware, filterCost);
 transactionRoute.get("/check-place-bought", authMiddleware, checkPlaceBought);
 transactionRoute.get("/check-place-tomtom", authMiddleware, checkPlaceByTomTom);
+transactionRoute.get("/top10-transaction", authMiddleware, listTop10TransactionLast);
+transactionRoute.post("/suggested-category", suggestedCategory);
 
 transactionRoute.get("/get-data-file", authMiddleware, getAllDataListFile);
 

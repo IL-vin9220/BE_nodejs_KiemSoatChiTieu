@@ -66,6 +66,38 @@ export const softDeleteSpending = async (req, res) => {
     }
 };
 
+export const listTop10TransactionLast = async (req, res) => {
+    try{
+        let userId = req.user.userId;
+        let listTop10 = await transactionServices.listTop10TransactionLast(userId);
+        res.status(statusCodes.OK).json({message: "Lấy dữ liệu top 10 giao dịch gần nhất thành công", data: listTop10});
+    }
+    catch(error){
+        const status = error instanceof AppError && error.statusCode ? error.statusCode: 500;
+        res.status(status).json({error: error.message || "Lỗi server !"});
+    }
+};
+
+export async function suggestedCategory(req, res) {
+    try {
+
+        const result = await transactionService.suggestedCategory(req.body);
+
+        return res.json({
+        success: true,
+        data: result
+        });
+
+    } catch (err) {
+
+        return res.status(500).json({
+        success: false,
+        message: err.message
+        });
+
+    }
+}
+
 export const searchItemInfor = async (req, res) => {
     try{
         // let userId = req.user.userId;

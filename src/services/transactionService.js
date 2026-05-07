@@ -519,6 +519,32 @@ async function filterRecord(dataRequest, userId){
     
 }
 
+async function listTop10TransactionLast(userId){
+    try{
+        if(!userId || userId == "") throw new AppError("Người dùng Không Xác Định", statusCodes.BAD_REQUEST);
+
+        let listTransactionTop10 = await transactionDetailRepo.listTop10TransactionLast(userId);
+        return listTransactionTop10;
+    }
+    catch(error){
+        if(error in AppError) throw error;
+
+        throw new AppError("Lỗi lấy danh sách top 10 giao dịch gần nhất", statusCodes.INTERNAL_SERVER_ERROR)
+    }
+}
+
+async function suggestedCategory(data) {
+    const predicted = await predictCategory(
+        data.description
+    );
+
+    return {
+        ...data,
+        suggestedCategory: predicted.category,
+        confidence: predicted.confidence
+    };
+}
+
 export default { 
     getTransactionByPage,
     AddNewTransaction,
@@ -532,4 +558,6 @@ export default {
     getListPlaceBought,
     getListPlaceTomTom,
     filterRecord,
+    listTop10TransactionLast,
+    suggestedCategory,
 };

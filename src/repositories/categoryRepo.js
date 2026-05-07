@@ -113,8 +113,8 @@ class categoryRepository{
             select sum(transaction_amount) as "totalAmount"
             from transaction_detail td
             inner join category c on td.category_id = c.id
-            inner join transactions t on td.transaction_id = t.transaction_id
-            where t.user_id = $1 and c.type = 0
+            inner join transactions t on td.id_transaction = t.id_transaction
+            where t.user_id = $1 and c.type = 0 and td.deleted_at is null
         `;
 
         let values = [

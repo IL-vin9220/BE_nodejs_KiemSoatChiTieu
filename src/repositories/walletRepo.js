@@ -5,7 +5,15 @@ class walletRepository{
 
     async getWallet(userId){
         let query = `
-            select * from wallet where user_id = $1 and deleted_at is null
+            select wallet_name as "categoryName",
+            amount::int,
+            icon,
+            to_char(created_at, 'DD/MM/YYYY') as date,
+            status_active as status,
+            type,
+            color 
+            from wallet 
+            where user_id = $1 and deleted_at is null
         `;
 
         let values = [

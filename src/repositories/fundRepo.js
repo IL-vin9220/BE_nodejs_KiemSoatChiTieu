@@ -3,7 +3,20 @@ import pool from "../config/database.js";
 class fundRepository{
     async getAllFundByUserId(userId){
         let query = `
-            select * from fund where user_id = $1 and deleted_at is null
+            select fund_name as "fundName",
+            fund_icon as "fundIcon",
+            amount_min::int as "amountMin",
+            amount_max::int as "amountMax",
+            amount_target::int as "amountTarget",
+            amount::int,
+            currency,
+            fund_color as "fundColor",
+            description,
+            isactive as "isActive",
+            type,
+            to_char(created_at, 'DD/MM/YYYY') as date
+            from fund 
+            where user_id = $1 and deleted_at is null
         `;
 
         let values = [

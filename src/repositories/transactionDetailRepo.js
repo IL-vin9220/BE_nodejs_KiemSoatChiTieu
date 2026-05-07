@@ -133,6 +133,28 @@ class transactionDetailRepository {
 
         return result.rows[0];
     }
+
+    async listTop10TransactionLast(userId){
+        let query = `
+            select td.transaction_name as "transactionName", 
+            c.category_name as "categoryName", 
+            to_char(t.transaction_date, 'DD/MM/YYYY') as "date", 
+            td.transaction_amount as "transactionAmount", 
+            c.type as type
+            from transaction_detail td inner join transactions t on td.id_transaction = t.id_transaction
+            inner join category c on td.category_id = c.id
+            where t.user_id = $1 and td.deleted_at is null
+            order by t.transaction_date desc
+            limit 10
+        `;
+
+        let values = [
+            userId
+        ];
+
+        let result = await pool.query(query, values);
+        return result.rows;
+    }
 }
 
 export default new transactionDetailRepository();
