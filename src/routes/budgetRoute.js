@@ -9,9 +9,9 @@ import {
 
 let budgetRoute = Router();
 
-budgetRoute.get('/get-all', authMiddleware, getAllBudget);
-budgetRoute.put('/create', authMiddleware, createBudget);
-budgetRoute.put('/update', authMiddleware, updateBudget);
-budgetRoute.put('/delete', authMiddleware, softDeletedBudget);
+budgetRoute.get('/get-all', getAllBudget);
+budgetRoute.put('/create', createBudget);
+budgetRoute.put('/update', updateBudget);
+budgetRoute.put('/delete', softDeletedBudget);
 
 export default budgetRoute;

@@ -68,7 +68,8 @@ export const softDeleteSpending = async (req, res) => {
 
 export const listTop10TransactionLast = async (req, res) => {
     try{
-        let userId = req.user.userId;
+        // let userId = req.user.userId;
+        let userId = 1;
         let listTop10 = await transactionServices.listTop10TransactionLast(userId);
         res.status(statusCodes.OK).json({message: "Lấy dữ liệu top 10 giao dịch gần nhất thành công", data: listTop10});
     }

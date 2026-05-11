@@ -124,6 +124,23 @@ class categoryRepository{
         let result = await pool.query(query, values);
         return result.rows[0];
     }
+
+    async getCategoryNameList(userId){
+        let query = `
+            select id,
+            category_name as "categoryName",
+            parent_id as "parentId"
+            from category c
+            where user_id = $1
+        `;
+
+        let values = [
+            userId
+        ];
+
+        let result = await pool.query(query, values);
+        return result.rows;
+    }
 }
 
 export default new categoryRepository();

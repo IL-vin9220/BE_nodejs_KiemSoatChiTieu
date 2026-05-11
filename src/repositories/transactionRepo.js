@@ -6,7 +6,20 @@ class transactionRepository {
 
 	async getTransactionByPage(limit, offset, userId){
 		let query = `
-			select * from transactions where user_id = $1 order by transaction_date desc limit $2 offset $3
+			select t.transaction_code as "transactionCode",
+			t.transaction_total_amount as "transactionTotalAmount",
+			t.transaction_date as "transactionDate",
+			t.transaction_time as "transactionTime",
+			td.transaction_detail_code as "transactionDetailCode",
+			td.transaction_name as "transactionName",
+			td.transaction_amount as "transactionAmount",
+			c.category_name as "categoryName"
+			from transactions t inner join transaction_detail td on t.id_transaction = td.id_transaction
+			inner join category c on td.category_id = c.id
+			where t.user_id = $1 
+			order by t.transaction_date desc 
+			limit $2 
+			offset $3
 		`;
 
 		let values = [

@@ -171,6 +171,22 @@ class walletRepository{
         let result = await pool.query(query, values);
         return result.rows[0];
     }
+
+    async getWalletNameList(userId){
+        let query = `
+            select id,
+            wallet_name as "walletName"
+            from wallet w
+            where user_id = $1 and deleted_at is null
+        `;
+
+        let values = [
+            userId
+        ];
+
+        let result = await pool.query(query, values);
+        return result.rows;
+    }
 }
 
 export default new walletRepository();

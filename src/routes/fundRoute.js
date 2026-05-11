@@ -8,10 +8,10 @@ import {
 } from "../controllers/fundController.js";
 import authMiddleware from "../middleware/middleware.js"
 
-fundRoute.put("/create", authMiddleware, createNewFund);
-fundRoute.put("/update", authMiddleware, updateFund);
-// fundRoute.post("/search", authMiddleware, searchCategory);
-fundRoute.put("/delete", authMiddleware, softDeletedFund);
-fundRoute.get("/get-all", authMiddleware, getAllFundByUserId);
+fundRoute.put("/create", createNewFund);
+fundRoute.put("/update", updateFund);
+// fundRoute.post("/search", searchCategory);
+fundRoute.put("/delete", softDeletedFund);
+fundRoute.get("/get-all", getAllFundByUserId);
 
 export default fundRoute;

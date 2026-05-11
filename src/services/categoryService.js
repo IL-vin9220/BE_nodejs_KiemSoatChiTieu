@@ -92,6 +92,16 @@ async function getTotalAmountByCategoryTypeExpense(userId){
     }
 }
 
+async function getCategoryNameList(userId){
+    try{
+        let categoryNameList = await categoryRepo.getCategoryNameList(userId);
+        return categoryNameList
+    }
+    catch(error){
+        throw new AppError("Lỗi lấy danh sách bản ghi danh mục", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
 export default {
     getAllCategory,
     addCategory,
@@ -99,5 +109,6 @@ export default {
     softDeleteCategory,
     searchCategory,
     getTotalAmountByCategoryTypeExpense,
+    getCategoryNameList,
 };
 

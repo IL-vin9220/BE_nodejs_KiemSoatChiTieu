@@ -17,7 +17,8 @@ export async function getAllWallet(req, res){
 
 export async function getAllAmountWalletActiveByUserId(req, res) {
     try{
-        let userId = req.user.userId;
+        // let userId = req.user.userId;
+        let userId = 1;
 
         let totalAmount = await walletService.getAllAmountWalletByUserIDAndActive(userId);
         res.status(statusCodes.OK).json({message: "SUCCESS", data: totalAmount});
@@ -64,6 +65,20 @@ export async function softDeletedWallet(req, res) {
         let dataRequest = req.body;
         await walletService.softDeletedWallet(dataRequest, userId);
         res.status(statusCodes.OK).json({message: "Xóa Dữ Liệu Ví Thành Công"});
+    }
+    catch(error){
+        const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;
+        res.status(status).json({ error: error.message || "Lỗi server!" });
+    }
+}
+
+export async function getWalletNameList(req, res) {
+    try{
+        // let userId = req.user.userId;
+        let userId = 1;
+        let dataRequest = req.body;
+        let walletNameListRes = await walletService.getWalletNameList(userId);
+        res.status(statusCodes.OK).json({message: "Lấy danh sách tên ví Thành Công", data: walletNameListRes});
     }
     catch(error){
         const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;

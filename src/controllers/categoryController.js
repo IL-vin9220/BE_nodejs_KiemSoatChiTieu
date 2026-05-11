@@ -89,3 +89,16 @@ export async function getTotalAmountByCategoryTypeExpense(req, res) {
         res.status(status).json({ error: error.message || "Lỗi server!" });
     }
 }
+
+export async function getCategoryNameList(req, res) {
+    try{
+        // let userId = req.user.userId;
+        let userId = 1;
+        let listCategory = await categoryServices.getCategoryNameList(userId);
+        res.status(statusCodes.OK).json({message: "Lấy danh sách danh mục thành công", data: listCategory});
+    }
+    catch(error){
+        const status = error instanceof AppError && error.statusCode ? error.statusCode : 500;
+        res.status(status).json({ error: error.message || "Lỗi server!" });
+    }
+}

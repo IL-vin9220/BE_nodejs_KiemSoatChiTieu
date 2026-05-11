@@ -93,10 +93,25 @@ async function softDeletedWallet(requestData, userId){
     }
 }
 
+async function getWalletNameList(userId){
+    try{
+        if(!userId || userId == "") throw new AppError("Lỗi Lấy Dữ liệu Từ FrontEnd", statusCodes.BAD_REQUEST);
+
+        let getWalletNameList = await walletRepo.getWalletNameList(userId);
+        return getWalletNameList;
+    }
+    catch(error){
+        if(error in AppError) throw error;
+
+        throw new AppError("Lỗi Xóa dữ liệu Ví Tiền", statusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
 export default {
     getAllWallet,
     getAllAmountWalletByUserIDAndActive,
     createNewWallet,
     updateWallet,
     softDeletedWallet,
+    getWalletNameList,
 }
