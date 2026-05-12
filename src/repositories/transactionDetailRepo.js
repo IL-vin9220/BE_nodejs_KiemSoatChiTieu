@@ -10,9 +10,10 @@ class transactionDetailRepository {
 		transaction_name,
         transaction_amount,
 		category_id,
+        wallet_id,
 		id_transaction
 		) 
-		VALUES ($1,$2,$3,$4,$5) RETURNING *;
+		VALUES ($1,$2,$3,$4,$5,$6) RETURNING *;
         `;
 
         let values = [
@@ -20,6 +21,7 @@ class transactionDetailRepository {
             transactionDetail.name,
             transactionDetail.amount,
             transactionDetail.categoryId,
+            transactionDetail.walletId,
             idTransaction,
         ];
 
@@ -32,13 +34,21 @@ class transactionDetailRepository {
             update transaction_detail td set
                 td.transaction_name = $1,
                 td.transaction_amount = $2,
-                td.category_id = $3
+                td.category_id = $3,
+                td.wallet_id = $4,
             from transactions t
-            where t.transaction_code = $4 and t.user_id = $5 and td.deleted_at is null
+            where t.transaction_code = $5 and t.user_id = $6 and td.deleted_at is null
             return *;
         `;
 
-        let values = [transactionDetail.name, transactionDetail.amount, transactionDetail.categoryId, transactionCode, userId];
+        let values = [
+            transactionDetail.name, 
+            transactionDetail.amount, 
+            transactionDetail.categoryId, 
+            transactionDetail.walletId,
+            transactionCode,
+            userId
+        ];
 
         let result = pool.query(query, values);
         return result.rows

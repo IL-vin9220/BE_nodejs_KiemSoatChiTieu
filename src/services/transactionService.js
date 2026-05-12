@@ -32,6 +32,7 @@ async function AddNewTransaction(transactions, userId) {
         let maxLength = amountArray.length<transactionArray.length?amountArray.length:transactionArray.length;
 
         let Code = await getCodeTransaction(maxLength, userId);
+        console.log("Code: ", Code);
 
         let transactionRoot = {
             "code": Code.transactionCode,
@@ -50,7 +51,8 @@ async function AddNewTransaction(transactions, userId) {
         let transactionDetail = {
             "name": transactions.name,
             "amount": transactions.amount,
-            "categoryId": transactions.categoryId
+            "categoryId": transactions.categoryId,
+            "walletId": transactions.walletId
         }
         
         await addNewTransactionDetail(
@@ -62,7 +64,7 @@ async function AddNewTransaction(transactions, userId) {
             userId
         );
     } catch (error) {
-        console.error('Error:', error.message);
+        console.error('Error add new transaction:', error.message);
         throw new AppError("Thêm Thất Bại", statusCodes.INTERNAL_SERVER_ERROR);
     }
 }
@@ -126,6 +128,7 @@ async function addNewTransactionDetail(transactionDetailData, transactionNumber,
         let amountArray = transactionDetailData.amount.split(",");
         let transactionArray = transactionDetailData.name.split(",");
         let categoryArray = transactionDetailData.categoryId.split(",");
+        let walletArray = transactionDetailData.walletId.split(",");
 
         if(transactionArray.length == amountArray.length){
             for(let i=0; i<=transactionArray.length-1; i++){
@@ -133,7 +136,8 @@ async function addNewTransactionDetail(transactionDetailData, transactionNumber,
                     "code": transactionDetailCodeList[i],
                     "name": transactionArray[i],
                     "amount": amountArray[i],
-                    "categoryId": parseInt(categoryArray[i])
+                    "categoryId": parseInt(categoryArray[i]),
+                    "walletId": parseInt(walletArray[i])
                 };
 
                 await transactionDetailRepo.addNew(subTransaction, parseInt(idTransaction.id_transaction));
@@ -145,7 +149,8 @@ async function addNewTransactionDetail(transactionDetailData, transactionNumber,
                     "code": transactionDetailCodeList[i],
                     "name": transactionArray[i],
                     "amount": amountArray[0]/(transactionArray.length==0?1:transactionArray.length),
-                    "categoryId": parseInt(categoryArray[i])
+                    "categoryId": parseInt(categoryArray[i]),
+                    "walletId": parseInt(walletArray[i])
                 };
 
                 await transactionDetailRepo.addNew(subTransaction, parseInt(idTransaction.id_transaction));
@@ -155,7 +160,7 @@ async function addNewTransactionDetail(transactionDetailData, transactionNumber,
         await transactionRepo.updateNumberTrans(transactionNumber+1, transactionDetailNumber+transactionArray.length, userId);
     }
     catch(error){
-        console.log(error);
+        console.error("Error add new transaction detail: ", error.message);
     }
 }
 
