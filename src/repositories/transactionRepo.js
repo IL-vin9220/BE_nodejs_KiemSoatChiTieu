@@ -13,10 +13,12 @@ class transactionRepository {
 			td.transaction_detail_code as "transactionDetailCode",
 			td.transaction_name as "transactionName",
 			td.transaction_amount as "transactionAmount",
-			c.category_name as "categoryName"
+			c.category_name as "categoryName",
+			c.id as "categoryId",
+			td.wallet_id as "walletId"
 			from transactions t inner join transaction_detail td on t.id_transaction = td.id_transaction
 			inner join category c on td.category_id = c.id
-			where t.user_id = $1 
+			where t.user_id = $1 and td.deleted_at is null
 			order by t.transaction_date desc 
 			limit $2 
 			offset $3

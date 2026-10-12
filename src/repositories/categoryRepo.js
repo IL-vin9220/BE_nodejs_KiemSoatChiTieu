@@ -95,7 +95,7 @@ class categoryRepository{
     async getAllCategory(userId){
         try{
             let query = `
-                select category_name, icon, parent_id, type, status, description from category where user_id = $1 and deleted_at is null
+                select id, category_name, icon, parent_id, type, status, description from category where user_id = $1 and deleted_at is null
             `;
 
             let values = [userId];

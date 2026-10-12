@@ -219,7 +219,8 @@ async function UpdateTransaction(transactionRequest, userId){
             "amount": transactionRequest.amount,
             "categoryId": transactionRequest.categoryId,
             "transactionDetailNote": transactionRequest.note??null,
-            "transactionImage": transactionRequest.image??null
+            "transactionImage": transactionRequest.image??null,
+            "walletId": transactionRequest.walletId
         };
 
         if(AllTransactionDetailCodeByDate.length==0){
