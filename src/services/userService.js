@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import AppError from "../config/error.js";
 import statusCodes from "../config/statusCodes.js";
 import userDTO from "../dto/request/userDTO.js";
-import { generateToken } from "../utils/jwt.js";
+// import { generateToken } from "../utils/jwt.js";
 // import { getAll, standardDataBeforePush, pushData } from "../services/commonService.js";
 import UserRepository from "../repositories/userRepo.js"
 import {
