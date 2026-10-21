@@ -95,8 +95,13 @@ async function login(userRequest){
 
         return {token};
     }
-    catch(error){
-        throw new AppError("Lỗi lấy thông tin tài khoản người dùng", statusCodes.INTERNAL_SERVER_ERROR);
+    catch(error) {
+        console.error("LOGIN ERROR:", error);
+
+        throw new AppError(
+            "Lỗi lấy thông tin tài khoản người dùng",
+            statusCodes.INTERNAL_SERVER_ERROR
+        );
     }
 }
 
