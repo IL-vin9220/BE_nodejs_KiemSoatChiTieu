@@ -1,34 +1,39 @@
-// middleware/jsonMiddleware.js
-// import { json, text } from 'express';
-
-// Middleware để phân tích JSON body
-// const jsonMiddleware = [
-//     json(),
-//     text({type: 'text/plain'})
-// ];
-
-// export default jsonMiddleware;
-
-
+import jwt from "jsonwebtoken";
 import { verifyToken } from "../utils/jwt.js";
-import dotenv from 'dotenv'
-
-dotenv.config();
 
 export default function authMiddleware(req, res, next) {
-    const token = req.cookies.accessToken;
+    const token = req.cookies?.accessToken;
 
     if (!token) {
-        return res.status(401).json({ message: "Chưa đăng nhập" });
+        return res.status(401).json({
+            code: "ACCESS_TOKEN_MISSING",
+            message: "Chưa đăng nhập"
+        });
     }
 
     try {
-        const decoded = verifyToken(token, process.env.SECRETKEY);
+        const decoded = verifyToken(token);
+
         req.user = {
             userId: decoded.userId
+        };
+
+        return next();
+
+    } catch (error) {
+
+        // Access Token hết hạn
+        if (error instanceof jwt.TokenExpiredError) {
+            return res.status(401).json({
+                code: "ACCESS_TOKEN_EXPIRED",
+                message: "Access Token đã hết hạn"
+            });
         }
-        next();
-    } catch (err) {
-        return res.status(403).json({ message: "Token không hợp lệ" });
+
+        // Token không hợp lệ
+        return res.status(401).json({
+            code: "ACCESS_TOKEN_INVALID",
+            message: "Access Token không hợp lệ"
+        });
     }
 }

@@ -6,6 +6,11 @@ import userDTO from "../dto/request/userDTO.js";
 import { generateToken } from "../utils/jwt.js";
 // import { getAll, standardDataBeforePush, pushData } from "../services/commonService.js";
 import UserRepository from "../repositories/userRepo.js"
+import {
+    generateToken,
+    generateRefreshToken,
+    verifyRefreshToken
+} from "../utils/jwt.js";
 
 config();
 
@@ -78,28 +83,44 @@ async function getUser(userId){
     }
 }
 
-async function login(userRequest){
-    try{
-        let userLogin = new userDTO();
+export const login = async (userRequest) => {
+    try {
+        const userLogin = new userDTO();
+
         userLogin.username = userRequest.username;
         userLogin.password = userRequest.password;
 
-        // query db
-        let isSuccess = await UserRepository.getUserInfor(userLogin);
+        const user = await UserRepository.getUserInfor(userLogin);
 
-        if(!isSuccess) return;
+        if (!user) {
+            return null;
+        }
 
-        let token = generateToken({
-            userId: isSuccess.id,
-        });
+        const payload = {
+            userId: user.id
+        };
 
-        return {token};
-    }
-    catch (error) {
+        return {
+            token: generateToken(payload),
+            refreshToken: generateRefreshToken(payload)
+        };
+
+    } catch (error) {
         console.error("LOGIN ERROR:", error);
-        throw new AppError(`Lỗi lấy thông tin tài khoản người dùng: ${error.message}`, 500);
+        throw error;
     }
-}
+};
+
+// Cấp lại Access Token
+export const refreshToken = async (refreshTokenValue) => {
+    const decoded = verifyRefreshToken(refreshTokenValue);
+
+    return {
+        token: generateToken({
+            userId: decoded.userId
+        })
+    };
+};
 
 export default {
     createNewUser,
