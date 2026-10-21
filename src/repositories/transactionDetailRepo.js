@@ -81,8 +81,9 @@ class transactionDetailRepository {
             transaction_amount = $3,
             category_id = $4,
             transaction_detail_note = $5,
-            transaction_image = $6
-            where td.transaction_detail_code = $7 
+            transaction_image = $6,
+            wallet_id = $7
+            where td.transaction_detail_code = $8 
             returning *;
         `;
         
@@ -93,6 +94,7 @@ class transactionDetailRepository {
             transactionDetail.categoryId,
             transactionDetail.transactionDetailNote??null,
             transactionDetail.transactionImage??null,
+            transactionDetail.walletId??null,
             transactionDetail.code
         ];
 
