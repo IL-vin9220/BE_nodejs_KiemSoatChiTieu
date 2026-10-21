@@ -65,20 +65,29 @@ class UserRepository{
     }
 
     async getUserInfor(user){
-        // console.log("user raw: ", user);
+        try {
+            console.log("[LOGIN] Starting database query");
 
-        let query = `
-            select * from users where users.username = $1 and users.password = $2
-        `;
+            const result = await pool.query(`
+                SELECT *
+                FROM users
+                WHERE username = $1
+                AND password = $2
+            `, [user.username, user.password]);
 
-        let values = [
-            user.username,
-            user.password
-        ];
+            console.log("[LOGIN] Row count:", result.rowCount);
 
-        let result = await pool.query(query, values);
-        // console.log(result);
-        return result.rows[0];
+            return result.rows[0];
+
+        } catch (error) {
+            console.error("[LOGIN] DATABASE ERROR:", {
+                message: error.message,
+                code: error.code,
+                stack: error.stack
+            });
+
+            throw error;
+        }
     }
 }
 
