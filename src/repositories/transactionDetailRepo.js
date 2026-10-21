@@ -3,6 +3,25 @@ import spendingFilterDTO from '../dto/response/spendingFilter.js';
 import spendingAddNewRecordDTO from '../dto/request/spendingAddRecordDTO.js';
 
 class transactionDetailRepository {
+
+    // get data by id transaction
+    async getDataTransactionDetailByIdTransaction(){
+        let query = `
+        SELECT
+            td.transaction_detail_code AS "transactionDetailCode",
+            td.transaction_name AS "transactionName",
+            td.transaction_amount AS "transactionAmount",
+            c.category_name AS "categoryName"
+        FROM transaction_detail td
+        INNER JOIN category c
+            ON td.category_id = c.id
+        WHERE td.id_transaction = ANY($1::int[])
+        ORDER BY
+            td.transaction_amount DESC,
+            td.transaction_detail_code DESC;
+        `;
+    }
+
     async addNew(transactionDetail, idTransaction){
         let query = `
         INSERT INTO transaction_detail (

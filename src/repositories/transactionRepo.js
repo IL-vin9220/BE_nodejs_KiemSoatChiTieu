@@ -4,22 +4,22 @@ import spendingAddNewRecordDTO from '../dto/request/spendingAddRecordDTO.js';
 
 class transactionRepository {
 
+	// get data
 	async getTransactionByPage(limit, offset, userId){
 		let query = `
-			select t.transaction_code as "transactionCode",
-			t.transaction_total_amount as "transactionTotalAmount",
-			t.transaction_date as "transactionDate",
-			t.transaction_time as "transactionTime",
-			td.transaction_detail_code as "transactionDetailCode",
-			td.transaction_name as "transactionName",
-			td.transaction_amount as "transactionAmount",
-			c.category_name as "categoryName"
-			from transactions t inner join transaction_detail td on t.id_transaction = td.id_transaction
-			inner join category c on td.category_id = c.id
-			where t.user_id = $1 
-			order by t.transaction_date desc 
-			limit $2 
-			offset $3
+			SELECT
+				t.transaction_code AS "transactionCode",
+				t.transaction_total_amount AS "transactionTotalAmount",
+				t.transaction_date AS "transactionDate",
+				t.transaction_time AS "transactionTime"
+			FROM transactions t
+			WHERE t.user_id = $1
+			ORDER BY
+				t.transaction_date DESC,
+				t.transaction_time DESC,
+				t.id_transaction DESC
+			LIMIT $2
+			OFFSET $3;
 		`;
 
 		let values = [
